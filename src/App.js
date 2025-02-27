@@ -12,6 +12,7 @@ import ClientDash from "./pages/ClientDash";
 import LawyerDash from "./pages/LawyerDash/LawyerDash";
 import Settings from "./pages/LawyerDash/Settings";
 import ClientsLawyer from "./pages/LawyerDash/ClientsLawyer";
+import Popupsection from "./pages/Popupsection";
 
 
 function App() {
@@ -31,6 +32,7 @@ function App() {
         <Route path="/lawyer-dashboard" element={<LawyerDash/>}></Route>
         <Route path="/lawyer-dashboard/clients" element={<ClientsLawyer/>}></Route>
         <Route path="/settings" element={<Settings/>}></Route>
+        <Route path="/popup" element={<Popupsection/>}></Route>
         <Route path="/upload" element={<Upload uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>}></Route>
         <Route path="/review" element={<Review uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>}></Route>
       </Routes>
