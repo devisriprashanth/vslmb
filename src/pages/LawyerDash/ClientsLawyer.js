@@ -52,13 +52,6 @@ const ClientsLawyer = () => {
       </thead>
       <tbody>
         {[
-          { name: 'Bhanu', type: 'Land dispute', hearing: '2:00 AM 15/02/25', status: 'Ongoing', outcome: '---' },
-          { name: 'Arun Teja', type: 'Divorce', hearing: '4:00 PM 23/02/25', status: 'Ongoing', outcome: '---' },
-          { name: 'Sandeep', type: 'Criminal case', hearing: '5:00 PM 17/02/25', status: 'Pending', outcome: '---' },
-          { name: 'Arun Teja', type: 'Land Dispute', hearing: '---', status: 'Completed', outcome: 'Win' },
-          { name: 'Raju', type: 'Tax Case', hearing: '---', status: 'Completed', outcome: 'Lose' },
-          { name: 'Dhanraja', type: 'Real Estate', hearing: '---', status: 'Completed', outcome: 'Win' },
-          { name: 'Kajal', type: 'Divorce', hearing: '---', status: 'Completed', outcome: 'Settled' }
         ].map((appointment, index) => (
           <tr key={index} className="border-b text-sm">
             <td className="py-2">{appointment.name}</td>
@@ -80,6 +73,15 @@ const ClientsLawyer = () => {
         {/* Sidebar */}
           <Menu />
         
+        <div className="bg-yellow-200 text-yellow-900 p-4 rounded-lg shadow-md mb-6 flex justify-between items-center">
+        <p className="font-semibold">Please fill out the required form to complete your profile.</p>
+        <button
+          className="bg-yellow-600 text-white px-4 py-2 rounded"
+          onClick={() => navigate('/lawyer-form')}
+        >
+          Fill Form
+        </button>
+      </div>
 
         {/* Main Content */}
         <div className="flex-1 p-6 w-full">

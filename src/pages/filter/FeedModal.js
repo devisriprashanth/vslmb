@@ -51,7 +51,7 @@ const FeedModal = ({ feed, onClose }) => {
           </button>
 
           <button
-            onClick={() => navigate('/form')}
+            onClick={() => navigate('/caseform')}
             className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary/90 transition-all"
           >
             Upload

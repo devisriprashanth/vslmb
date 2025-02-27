@@ -1,32 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../../component/Header';
 import FilterSection from './FilterSection';
 import FeedCard from './FeedCard';
 import { useNavigate } from 'react-router-dom';
 import FeedModal from './FeedModal';
-import bg from '../../assets/img/filter.jpg'
+import bg from '../../assets/img/filter.jpg';
+import supabase from '../../supabaseClient';
 
 const Filter = () => {
   const navigate = useNavigate();
 
-  const initialFeedData = [
-    { name: "Advocate Name", category: 'Criminal', rating: '2', experience: '5 years', location: "Location", fee: 10000, successRate: 95 },
-    { name: "Advocate Name", category: 'Civil', rating: '4', experience: '6 years', location: "Location", fee: 15000, successRate: 90 },
-    { name: "Advocate Name", category: 'Intellectual Property', rating: '3', experience: '7 years', location: "Location", fee: 12000, successRate: 85 },
-    { name: "Advocate Name", category: 'Immigration', rating: '4', experience: '3 years', location: "Location", fee: 8000, successRate: 88 },
-    { name: "Advocate Name", category: 'Civil', rating: '5', experience: '12 years', location: "Location", fee: 20000, successRate: 92 },
-  ];
-
+  const [feedData, setFeedData] = useState([]);
   const [filters, setFilters] = useState({
     rating: [],
     successRate: 0,
     experience: 1,
     categories: [],
   });
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Fetch Data from Backend
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      const { data, error } = await supabase.from("lawyers_form").select("*");
+
+      if (error) {
+        console.error("Failed to fetch lawyers data:", error);
+      } else {
+        setFeedData(data);
+      }
+    };
+
+    fetchLawyers();
+  }, []);
 
   const handleFilterChange = (filterType, value) => {
     setFilters((prevFilters) => {
@@ -42,13 +50,12 @@ const Filter = () => {
   };
 
   const parseExperienceYears = (experience) => {
-    const years = parseInt(experience.split(' ')[0], 10);
-    return isNaN(years) ? 0 : years;
+    return experience || 0;
   };
 
-  const filteredFeedData = initialFeedData.filter((feed) => {
-    const ratingMatch = filters.rating.length === 0 || filters.rating.includes(feed.rating);
-    const successRateMatch = filters.successRate === 0 || feed.successRate <= filters.successRate;
+  const filteredFeedData = feedData.filter((feed) => {
+    const ratingMatch = filters.rating.length === 0 || filters.rating.includes(feed.rating.toString());
+    const successRateMatch = filters.successRate === 0 || feed.success_rate <= filters.successRate;
     const experienceMatch = parseExperienceYears(feed.experience) >= filters.experience;
     const categoryMatch = filters.categories.length === 0 || filters.categories.includes(feed.category);
     return ratingMatch && successRateMatch && experienceMatch && categoryMatch;
@@ -68,7 +75,7 @@ const Filter = () => {
     <section className='w-full min-h-screen bg-cover bg-center' style={{ backgroundImage: `url(${bg})` }}>
       <Header />
 
-      <button 
+      <button
         className="bg-white/70 backdrop-blur-md p-4 rounded-lg m-5 shadow-lg flex items-center justify-between w-full max-w-sm"
         onClick={() => setIsFilterOpen(!isFilterOpen)}
       >
@@ -84,15 +91,15 @@ const Filter = () => {
 
       <div className="w-full p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredFeedData.map((feed, index) => (
-          <FeedCard 
+          <FeedCard
             key={index}
-            name={feed.name}
+            name={feed.first_name}
             category={feed.category}
             location={feed.location}
-            fee={feed.fee}
-            experience={feed.experience}
-            successRate={feed.successRate}
-            rating={feed.rating}
+            fee={feed.price}
+            experience={`${feed.experience} years`}
+            successRate={feed.success_rate}
+            rating={feed.rating.toFixed(1)}
             onClick={() => handleFeedClick(feed)}
           />
         ))}
@@ -103,4 +110,4 @@ const Filter = () => {
   );
 };
 
-export default Filter
+export default Filter;

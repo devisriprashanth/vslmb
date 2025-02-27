@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../component/Header';
-import { RiMenu3Fill , RiMenu2Line } from "react-icons/ri";
+import { RiMenu3Fill, RiMenu2Line } from "react-icons/ri";
 
 const LawyerDash = () => {
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [appointments, setAppointments] = useState([
-    { id: 1, clientName: "Bhanu", caseType: "Land Dispute", date: "2025-02-15T10:00", status: "Ongoing" },
-    { id: 2, clientName: "Arun Teja", caseType: "Divorce", date: "2025-02-16T14:00", status: "Pending" }
   ]);
 
   const [previousClients, setPreviousClients] = useState([]);
@@ -37,88 +35,94 @@ const LawyerDash = () => {
 
   return (
     <section className="min-h-screen bg-bg1 py-2 px-6">
-        <Header />
-      <div className="flex justify-between items-center px-3 md:px-5 mb-6 w-auto">
-                <h1 className="text-2xl font-bold">Lawyer Dashboard</h1>
-      
-                {/* Menu Button Wrapper with Relative Position */}
-                <div className="relative">
-                  <button
-                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                    className="bg-secondary text-white px-4 py-2 rounded"
-                  >
-                    {isMenuOpen ? <RiMenu2Line /> : <RiMenu3Fill />}
-                  </button>
-      
-                  {/* Dropdown Menu with Auto Width */}
-                  {isMenuOpen && (
-                    <div className="absolute right-0 top-12 bg-white w-auto rounded-lg shadow-lg z-40 animate-slide-down">
-                      <button onClick={() => navigate('/lawyer-dashboard')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
-                        Dashboard
-                      </button>
-                      <button onClick={() => navigate('/lawyer-dashboard/clients')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
-                        Clients
-                      </button>
-                      <button onClick={() => navigate('/settings')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
-                        Settings
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+      <Header />
+      <div className="flex justify-between items-center px-3 mt-3 md:px-5 mb-6 w-auto">
+        <h1 className="text-2xl font-bold">Lawyer Dashboard</h1>
+        <div className="relative">
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="bg-secondary text-white px-4 py-2 rounded"
+          >
+            {isMenuOpen ? <RiMenu2Line /> : <RiMenu3Fill />}
+          </button>
+          {isMenuOpen && (
+            <div className="absolute right-0 top-12 bg-white w-auto rounded-lg shadow-lg z-40 animate-slide-down">
+              <button onClick={() => navigate('/lawyer-dashboard')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                Dashboard
+              </button>
+              <button onClick={() => navigate('/lawyer-dashboard/clients')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                Clients
+              </button>
+              <button onClick={() => navigate('/settings')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                Settings
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Alert Section */}
+      <div className="bg-yellow-200 text-yellow-900 p-4 rounded-lg shadow-md mb-6 flex justify-between items-center">
+        <p className="font-semibold">Please fill out the required form to complete your profile.</p>
+        <button
+          className="bg-yellow-600 text-white px-4 py-2 rounded"
+          onClick={() => navigate('/lawyer-form')}
+        >
+          Fill Form
+        </button>
+      </div>
 
       {/* Appointments Section */}
       <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect mb-6">
         <h2 className="text-lg font-semibold mb-4 text-black">Upcoming Appointments</h2>
         {appointments.length > 0 ? (
-            <table className="w-full text-left">
+          <table className="w-full text-left">
             <thead>
-                <tr>
+              <tr>
                 <th>Client Name</th>
                 <th>Case Type</th>
                 <th>Date</th>
                 <th>Status</th>
-                </tr>
+              </tr>
             </thead>
             <tbody>
-                {appointments.map((app) => (
+              {appointments.map((app) => (
                 <tr key={app.id} className="border-b">
-                    <td>{app.clientName}</td>
-                    <td>{app.caseType}</td>
-                    <td>
+                  <td>{app.clientName}</td>
+                  <td>{app.caseType}</td>
+                  <td>
                     <input
-                        type="date"
-                        value={app.date.split("T")[0]}
-                        className="border p-1 rounded w-full sm:w-auto"
-                        onChange={(e) =>
+                      type="date"
+                      value={app.date.split("T")[0]}
+                      className="border p-1 rounded w-full sm:w-auto"
+                      onChange={(e) =>
                         setAppointments(
-                            appointments.map((a) =>
+                          appointments.map((a) =>
                             a.id === app.id ? { ...a, date: e.target.value } : a
-                            )
+                          )
                         )
-                        }
+                      }
                     />
-                    </td>
-                    <td>
+                  </td>
+                  <td>
                     <select
-                        value={app.status}
-                        className="border p-1 rounded"
-                        onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                      value={app.status}
+                      className="border p-1 rounded"
+                      onChange={(e) => handleStatusChange(app.id, e.target.value)}
                     >
-                        <option>Pending</option>
-                        <option>Ongoing</option>
-                        <option>Completed</option>
+                      <option>Pending</option>
+                      <option>Ongoing</option>
+                      <option>Completed</option>
                     </select>
-                    </td>
+                  </td>
                 </tr>
-                ))}
+              ))}
             </tbody>
-            </table>
+          </table>
         ) : (
-            <p>No Upcoming Appointments</p>
+          <p>No Upcoming Appointments</p>
         )}
-        </div>
-
+      </div>
 
       {/* Previous Clients Section */}
       <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect">
@@ -182,4 +186,4 @@ const LawyerDash = () => {
   );
 };
 
-export default LawyerDash
+export default LawyerDash;
