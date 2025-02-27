@@ -84,29 +84,37 @@ const Settings = () => {
   );
 
   return (
-    <section className="bg-bg2 min-h-screen">
+    <section className="bg-bg1 min-h-screen">
       <Header />
-      <div className="flex justify-between items-center px-3 md:px-5 mb-6">
-              <h1 className="text-2xl font-bold">Lawyer Dashboard</h1>
-              <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="bg-blue-500 text-white px-4 py-2 rounded">
-                {isMenuOpen ?   <RiMenu2Line /> : <RiMenu3Fill />}
-              </button>
-            </div>
-      
+      <div className="flex justify-between items-center px-3 md:px-5 mb-6 w-auto">
+          <h1 className="text-2xl font-bold">Lawyer settings</h1>
+
+          {/* Menu Button Wrapper with Relative Position */}
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="bg-secondary text-white px-4 py-2 rounded"
+            >
+              {isMenuOpen ? <RiMenu2Line /> : <RiMenu3Fill />}
+            </button>
+
+            {/* Dropdown Menu with Auto Width */}
             {isMenuOpen && (
-              <nav className="mx-2 md:mx-10 bg-white shadow p-4 rounded">
-                <button onClick={() => navigate('/lawyer-dashboard')} className="block text-secondary mb-2">
+              <div className="absolute right-0 top-12 bg-white w-auto rounded-lg shadow-lg z-40 animate-slide-down">
+                <button onClick={() => navigate('/lawyer-dashboard')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
                   Dashboard
                 </button>
-                <button onClick={() => navigate('/clients')} className="block text-secondary">
+                <button onClick={() => navigate('/lawyer-dashboard/clients')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
                   Clients
                 </button>
-                <button onClick={() => navigate('/settings')} className="block text-secondary">
+                <button onClick={() => navigate('/settings')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
                   Settings
                 </button>
-              </nav>
+              </div>
             )}
-      <div className='w-full flex justify-end p-4'>
+          </div>
+        </div>
+      <div className='w-full flex justify-start p-4'>
         <button className='bg-secondary text-white px-5 py-2 rounded' onClick={() => navigate('/lawyer-form')}>
           Fill Form
         </button>
@@ -114,8 +122,7 @@ const Settings = () => {
 
       <div className="flex flex-col items-center p-4">
         <div className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-lg w-full max-w-xl glass-effect">
-          <h3 className="text-3xl font-semibold text-black mb-4">Settings</h3>
-          <h2 className="text-xl text-black mb-4">Welcome!</h2>
+          <h2 className="text-2xl text-black mb-4">Welcome!</h2>
           <h2 className="text-lg text-black mb-4">User Name</h2>
 
           <div>

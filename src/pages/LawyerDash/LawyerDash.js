@@ -38,29 +38,37 @@ const LawyerDash = () => {
   return (
     <section className="min-h-screen bg-bg1 py-2 px-6">
         <Header />
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Lawyer Dashboard</h1>
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="bg-blue-500 text-white px-4 py-2 rounded">
-          {isMenuOpen ?   <RiMenu2Line /> : <RiMenu3Fill />}
-        </button>
-      </div>
-
-      {isMenuOpen && (
-        <nav className="mb-6 bg-white shadow p-4 rounded">
-          <button onClick={() => navigate('/lawyer-dashboard')} className="block text-secondary mb-2">
-            Dashboard
-          </button>
-          <button onClick={() => navigate('/clients')} className="block text-secondary">
-            Clients
-          </button>
-          <button onClick={() => navigate('/settings')} className="block text-secondary">
-            Settings
-          </button>
-        </nav>
-      )}
+      <div className="flex justify-between items-center px-3 md:px-5 mb-6 w-auto">
+                <h1 className="text-2xl font-bold">Lawyer Dashboard</h1>
+      
+                {/* Menu Button Wrapper with Relative Position */}
+                <div className="relative">
+                  <button
+                    onClick={() => setIsMenuOpen(!isMenuOpen)}
+                    className="bg-secondary text-white px-4 py-2 rounded"
+                  >
+                    {isMenuOpen ? <RiMenu2Line /> : <RiMenu3Fill />}
+                  </button>
+      
+                  {/* Dropdown Menu with Auto Width */}
+                  {isMenuOpen && (
+                    <div className="absolute right-0 top-12 bg-white w-auto rounded-lg shadow-lg z-40 animate-slide-down">
+                      <button onClick={() => navigate('/lawyer-dashboard')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                        Dashboard
+                      </button>
+                      <button onClick={() => navigate('/lawyer-dashboard/clients')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                        Clients
+                      </button>
+                      <button onClick={() => navigate('/settings')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                        Settings
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
 
       {/* Appointments Section */}
-      <div className="bg-white p-6 rounded-lg shadow-lg glass-effect mb-6">
+      <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect mb-6">
         <h2 className="text-lg font-semibold mb-4 text-black">Upcoming Appointments</h2>
         {appointments.length > 0 ? (
             <table className="w-full text-left">
@@ -113,7 +121,7 @@ const LawyerDash = () => {
 
 
       {/* Previous Clients Section */}
-      <div className="bg-white p-6 rounded-lg shadow-lg glass-effect">
+      <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect">
         <h2 className="text-lg font-semibold mb-4 text-black">Previous Clients</h2>
         {previousClients.length > 0 ? (
           <ul>
