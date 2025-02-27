@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import clientBg from "../assets/client_login.png"; // Import Client BG
-import lawyerBg from "../assets/lawyer_login.png"; // Import Lawyer BG
+import { useNavigate } from "react-router-dom"; 
+import client from '../assets/img/client.jpg';// Import Client BG
+import lawyer from '../assets/img/lawyer.jpg'// Import Lawyer BG
 
 const Login = () => {
   const [isFocused, setIsFocused] = useState(false);
@@ -14,7 +14,7 @@ const Login = () => {
     <section
       className={`h-screen bg-cover bg-center flex flex-col md:flex-row  gap-4 transition-all duration-500`}
       style={{
-        backgroundImage: `url(${isLawyerSelected ? lawyerBg : clientBg})`, // Dynamic background
+        backgroundImage: `url(${isLawyerSelected ? lawyer : client})`, // Dynamic background
       }}
     >
       {/* Left Section - Logo (Moves to Right for Lawyer) */}

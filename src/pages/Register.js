@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import clientBg from "../assets/client_login.png"; // Import Client BG
-import lawyerBg from "../assets/lawyer_login.png"; // Import Lawyer BG
+import client from '../assets/img/client.jpg';// Import Client BG
+import lawyer from '../assets/img/lawyer.jpg'// Import Lawyer BG
 
 const Register = () => {
   const [isLawyerSelected, setIsLawyerSelected] = useState(false);
@@ -16,7 +16,7 @@ const Register = () => {
     <section
       className="h-screen bg-cover bg-center flex flex-col md:flex-row gap-4 transition-all duration-500"
       style={{
-        backgroundImage: `url(${isLawyerSelected ? lawyerBg : clientBg})`,
+        backgroundImage: `url(${isLawyerSelected ? lawyer : client})`,
       }}
     >
       {/* Left Section - Logo */}
