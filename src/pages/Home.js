@@ -13,15 +13,21 @@ const Home = () => {
     <>
       <section>
         {/* Hero Section */}
-        <div className="flex flex-col h-fit bg-cover bg-center" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
-          <Header />
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold my-8 md:my-20 text-white text-center">
+        <div className="relative min-h-screen bg-cover bg-center px-6" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
+          <Header/>
+          <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
             Welcome!
           </h1>
-          <div className='w-full flex items-center justify-center'>
-            <button className='text-white bg-secondary flex items-center  my-8 md:my-20 px-4 py-2 rounded-lg text-sm md:text-lg hover:bg-opacity-80 transition'>
+          <p className="mt-4 md:mt-6 text-lg sm:text-xl md:text-2xl max-w-3xl">
+          Explore a world of endless possibilities. Discover, learn, and grow
+          with our exclusive resources and expert guidance.
+          </p>
+          <div className='mt-8'>
+            <button className='text-white bg-secondary flex items-center px-6 py-3 rounded-lg text-lg hover:bg-green-800 transition' onClick={() => navigate('/login')}>
               Get Started <FaArrowRight className='ml-2' />
             </button>
+          </div>
           </div>
         </div>
 

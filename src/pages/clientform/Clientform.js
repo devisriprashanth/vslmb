@@ -3,10 +3,8 @@ import "../../index.css";
 import { useNavigate } from "react-router-dom";
 import form1 from "../../assets/img/caseform.jpg";
 import { CiLocationOn } from "react-icons/ci";
-import  supabase  from "../../supabaseClient";
+import supabase from "../../supabaseClient";
 import toast from "react-hot-toast";
-
-
 
 const Clientform = () => {
   const navigate = useNavigate();
@@ -18,12 +16,25 @@ const Clientform = () => {
 
   const handleSubmit = async () => {
     if (!caseName || !category || !phoneNumber || !location || !description) {
-      toast.error("Fill all fields");
+      toast.error("Please Fill All Fields");
       return;
     }
 
-    const { data, error } = await supabase.from("client_form").insert([
+    if (phoneNumber.length !== 10) {
+      toast.error("Invalid Phone Number");
+      return;
+    }
+
+    const { data: user, error: authError } = await supabase.auth.getUser();
+
+    if (authError) {
+      toast.error("User Not Authenticated");
+      return;
+    }
+
+    const { data, error } = await supabase.from("caseform").insert([
       {
+        client_id: user.user.id, // Automatically fetch user UID
         case_name: caseName,
         category: category,
         phone_number: phoneNumber,
@@ -33,7 +44,8 @@ const Clientform = () => {
     ]);
 
     if (error) {
-      toast.error("Submission Failed");
+      console.log("Upload Error:", error);
+      toast.error("Submission Failed ❌");
     } else {
       toast.success("Form Submitted Successfully ✅");
       navigate("/upload");
@@ -53,12 +65,12 @@ const Clientform = () => {
           <div className="flex flex-col gap-4">
             <input
               type="text"
-              placeholder="Enter the Case Name"
+              placeholder="Enter Case Name"
               className="p-2 border border-gray-300 rounded-md text-lg"
               value={caseName}
               onChange={(e) => setCaseName(e.target.value)}
             />
-            <select
+           <select
               className="p-2 border border-gray-300 rounded-md text-lg bg-white"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -96,6 +108,7 @@ const Clientform = () => {
               </option>
               <option value="Contract Lawyer">Contract Lawyer</option>
             </select>
+
             <input
               type="tel"
               placeholder="Phone Number"
@@ -104,6 +117,7 @@ const Clientform = () => {
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
+
             <div className="flex items-center border border-gray-300 rounded-md bg-white">
               <CiLocationOn className="text-gray-500 mx-2 text-lg" />
               <select
@@ -143,13 +157,13 @@ const Clientform = () => {
             </div>
 
             <textarea
-              className="p-3 border border-gray-300 rounded-md text-lg h-32 resize-none"
+              className="p-3 border border-gray-300 rounded-md h-32"
               placeholder="Description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
             ></textarea>
 
-            <p className="text-center text-lg">
+            <p className="text-center">
               Want to add doc?{" "}
               <span
                 className="text-secondary cursor-pointer"
@@ -160,7 +174,7 @@ const Clientform = () => {
             </p>
 
             <button
-              className="p-2 bg-secondary text-white text-lg rounded-md hover:shadow-xl cursor-pointer"
+              className="p-2 bg-secondary text-white rounded-md"
               onClick={handleSubmit}
             >
               SUBMIT
