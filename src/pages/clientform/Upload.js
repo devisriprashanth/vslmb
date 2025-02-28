@@ -4,11 +4,12 @@ import "../../index.css";
 import form1 from "../../assets/img/caseform.jpg";
 import form2 from "../../assets/icons/drop_img.svg";
 import { createClient } from "@supabase/supabase-js";
+import toast from "react-hot-toast"; // Optional for Notifications
 
 // Supabase Connection
 const supabase = createClient(
-  "https://<YOUR_SUPABASE_URL>",
-  "<YOUR_SUPABASE_API_KEY>"
+  "https://ifcivkmccvwvtcttucrc.supabase.co",
+  "your_anon_key_here"
 );
 
 const Upload = ({ uploadedFiles, setUploadedFiles }) => {
@@ -21,56 +22,65 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
     fileInputRef.current.click();
   };
 
+  const processFile = async (file) => {
+    if (file && file.type === "application/pdf") {
+      setIsLoading(true);
+      const fileName = `${Date.now()}_${file.name}`; // Rename File
+
+      const { data, error } = await supabase.storage
+        .from("files") // Your Bucket Name
+        .upload(`documents/${fileName}`, file, {
+          cacheControl: "3600",
+          upsert: false,
+        });
+
+      if (error) {
+        toast.error("Upload Failed ❌");
+        console.log(error);
+      } else {
+        const { data: urlData } = await supabase.storage
+          .from("files")
+          .getPublicUrl(`documents/${fileName}`);
+
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            name: file.name,
+            size: (file.size / 1024).toFixed(2) + " KB",
+            date: new Date().toLocaleDateString(),
+            url: urlData.publicUrl,
+          },
+        ]);
+
+        toast.success("Uploaded Successfully ✅");
+        navigate("/review");
+      }
+
+      setIsLoading(false);
+    } else {
+      toast.error("Only PDF files allowed ❌");
+    }
+    setIsDragging(false);
+  };
+
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     processFile(file);
   };
 
-  const processFile = async (file) => {
-    if (file && file.type === "application/pdf") {
-      setIsLoading(true);
-      const fileName = `${Date.now()}_${file.name}`;
-
-      const { data, error } = await supabase.storage
-        .from("files")
-        .upload(`documents/${fileName}`, file);
-
-      if (error) {
-        alert("Failed to upload file ❌");
-        console.error(error);
-      } else {
-        setUploadedFiles((prevFiles) => [
-          ...prevFiles,
-          {
-            name: file.name,
-            size: (file.size / 1024).toFixed(2) + " KB",
-            date: new Date().toLocaleDateString(),
-            url: data.path,
-          },
-        ]);
-        alert("File Uploaded Successfully ✅");
-        navigate("/review");
-      }
-      setIsLoading(false);
-    } else {
-      alert("Please upload a PDF file only");
-    }
-    setIsDragging(false);
-  };
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
+  const handleDragOver = (e) => {
+    e.preventDefault();
     setIsDragging(true);
   };
 
-  const handleDragLeave = (event) => {
-    event.preventDefault();
+  const handleDragLeave = (e) => {
+    e.preventDefault();
     setIsDragging(false);
   };
 
-  const handleDrop = (event) => {
-    event.preventDefault();
-    const file = event.dataTransfer.files[0];
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
     processFile(file);
   };
 
@@ -90,15 +100,15 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
         >
           <img src={form2} alt="upload" className="w-40 h-auto mb-4" />
           <h1 className="text-secondary text-xl text-center mb-4">
-            {isDragging ? "Drop your PDF here" : "Drop your PDF"}
+            {isDragging ? "Drop your PDF here" : "Drag & Drop your PDF"}
           </h1>
           <span className="text-gray-600 mb-4">or</span>
           <input
             type="file"
             ref={fileInputRef}
-            accept=".pdf,application/pdf"
-            onChange={handleFileChange}
+            accept=".pdf"
             className="hidden"
+            onChange={handleFileChange}
           />
           <button
             onClick={handleButtonClick}

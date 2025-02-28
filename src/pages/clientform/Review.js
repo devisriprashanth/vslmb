@@ -1,14 +1,10 @@
 import React, { useRef, useState } from "react";
 import "../../index.css";
 import form1 from "../../assets/img/caseform.jpg";
-import { createClient } from "@supabase/supabase-js";
+import supabase from "../../supabaseClient";
 import { toast } from "react-toastify";
 
-// Supabase Connection
-const supabase = createClient(
-  "https://<YOUR_SUPABASE_URL>",
-  "<YOUR_SUPABASE_API_KEY>"
-);
+
 
 const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
   const fileInputRef = useRef(null);
@@ -16,18 +12,18 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
 
   const handleRemoveFile = async (indexToRemove) => {
     const fileToRemove = uploadedFiles[indexToRemove];
-    const filePath = fileToRemove.url;
+    const filePath = fileToRemove.url.split("/storage/v1/object/public/")[1];
 
     const { error } = await supabase.storage.from("law_docs").remove([filePath]);
 
     if (error) {
-      toast.error("Failed to delete file ❌");
+      toast.error("❌ Failed to delete file");
       console.error(error);
     } else {
-      setUploadedFiles((prevFiles) =>
-        prevFiles.filter((_, index) => index !== indexToRemove)
+      setUploadedFiles((prev) =>
+        prev.filter((_, index) => index !== indexToRemove)
       );
-      toast.success("File Removed Successfully ✅");
+      toast.success("✅ File Removed Successfully");
     }
   };
 
@@ -35,32 +31,51 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files)
-      .filter((file) => file.type === "application/pdf")
-      .map((file) => ({
-        name: file.name,
-        size: `${(file.size / 1024).toFixed(2)} KB`,
-        date: new Date().toLocaleDateString(),
-      }));
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    const pdfFiles = files.filter((file) => file.type === "application/pdf");
 
-    if (newFiles.length < e.target.files.length) {
-      toast.warning("Only PDF files are accepted ❗");
+    if (pdfFiles.length < files.length) {
+      toast.warning("❗ Only PDF files are accepted");
     }
 
-    setUploadedFiles((prevFiles) => [...prevFiles, ...newFiles]);
-    e.target.value = null;
+    const uploaded = [];
+    for (let file of pdfFiles) {
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from("files")
+        .upload(`documents/${fileName}`, file, {
+          cacheControl: "3600",
+        });
+
+      if (error) {
+        toast.error("❌ Upload Failed");
+      } else {
+        const { data: urlData } = await supabase.storage
+          .from("law_docs")
+          .getPublicUrl(`documents/${fileName}`);
+
+        uploaded.push({
+          name: file.name,
+          size: `${(file.size / 1024).toFixed(2)} KB`,
+          date: new Date().toLocaleDateString(),
+          url: urlData.publicUrl,
+        });
+      }
+    }
+
+    setUploadedFiles((prev) => [...prev, ...uploaded]);
+    toast.success("✅ Files Uploaded Successfully");
+    e.target.value = "";
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-
     if (uploadedFiles.length > 0) {
-      toast.success("Case Files Submitted Successfully ✅");
+      toast.success("✅ Case Files Submitted Successfully");
     } else {
-      toast.error("Please Upload Files Before Submitting ❌");
+      toast.error("❌ Please Upload Files Before Submitting");
     }
-
     setIsSubmitting(false);
   };
 
@@ -89,6 +104,7 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
                       <th className="p-3 text-sm text-gray-700">File Name</th>
                       <th className="p-3 text-sm text-gray-700">Size</th>
                       <th className="p-3 text-sm text-gray-700">Date</th>
+                      <th className="p-3 text-sm text-gray-700">Preview</th>
                       <th className="p-3 text-sm text-gray-700">Remove</th>
                     </tr>
                   </thead>
@@ -98,6 +114,16 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
                         <td className="p-3 text-sm">{file.name}</td>
                         <td className="p-3 text-sm">{file.size}</td>
                         <td className="p-3 text-sm">{file.date}</td>
+                        <td className="p-3">
+                          <a
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline"
+                          >
+                            Preview 🔥
+                          </a>
+                        </td>
                         <td className="p-3">
                           <button
                             onClick={() => handleRemoveFile(index)}
@@ -120,8 +146,8 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className={`bg-secondary text-white text-lg rounded-md px-6 py-2 hover:shadow-xl ${
+                  disabled={isSubmitting || uploadedFiles.length === 0}
+                  className={`bg-secondary text-white text-lg rounded-md px-6 py-2 ${
                     isSubmitting ? "bg-gray-400 cursor-not-allowed" : ""
                   }`}
                 >
@@ -132,21 +158,12 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
           ) : (
             <div className="flex flex-col items-center">
               <p className="text-lg text-gray-600 mb-4">No files uploaded yet</p>
-              <div className="flex flex-col gap-4">
-                <button
-                  onClick={handleUploadClick}
-                  className="bg-secondary text-white text-lg rounded-md px-6 py-2 hover:shadow-xl"
-                >
-                  Upload
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  disabled
-                  className="bg-gray-400 text-white text-lg rounded-md px-6 py-2 cursor-not-allowed"
-                >
-                  Submit
-                </button>
-              </div>
+              <button
+                onClick={handleUploadClick}
+                className="bg-secondary text-white text-lg rounded-md px-6 py-2 hover:shadow-xl"
+              >
+                Upload Files
+              </button>
             </div>
           )}
         </div>
