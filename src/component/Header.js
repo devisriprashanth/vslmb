@@ -30,7 +30,7 @@ const Header = () => {
             SLMB
           </h1>
           <p className="text-sm text-third font-medium mt-1">
-            Your trusted legal 
+            Your trusted legal partner 
           </p>
         </div>
 
