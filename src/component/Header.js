@@ -27,7 +27,7 @@ const Header = () => {
       <div className="flex flex-row items-center">
         <div className="flex flex-1 flex-col items-start mt-3 mb-3 md:mb-0">
           <h1 className="text-2xl text-third cursor-pointer font-bold" onClick={() => navigate('/')}>
-            Smart-Advocate Matching And Booking
+            Smart-Advocate Matching And Booking System
           </h1>
           <p className="text-sm text-third font-medium mt-1">
             Your trusted legal partner 
