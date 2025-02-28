@@ -105,7 +105,7 @@ const Filter = () => {
         ))}
       </div>
 
-      {isModalOpen && <FeedModal feed={selectedFeed} onClose={handleCloseModal} />}
+      {isModalOpen && <FeedModal lawyer={selectedFeed} onClose={handleCloseModal} />}
     </section>
   );
 };

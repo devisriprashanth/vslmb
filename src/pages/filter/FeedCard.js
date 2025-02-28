@@ -6,13 +6,13 @@ import star from '../../assets/icons/star.svg';
 
 const FeedCard = ({ name, category, rating, experience, location, fee, successRate, onClick }) => {
   return (
-    <div 
+    <div
       className="bg-white/90 p-4 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow space-y-4"
       onClick={onClick}
     >
       {/* Header with Icon and Name */}
       <div className="flex items-center gap-4">
-        <FaUserTie className=" w-12 h-12" />
+        <FaUserTie className="w-12 h-12" />
         <div>
           <h3 className="font-semibold text-lg">{name}</h3>
           <p className="text-gray-600">{category}</p>
@@ -35,17 +35,17 @@ const FeedCard = ({ name, category, rating, experience, location, fee, successRa
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center gap-2 bg-bg1 p-2 rounded-md">
           <FaBriefcase className="text-secondary w-6 h-6" />
-          <p>{experience}</p>
+          <p>{experience} Years</p>
         </div>
 
         <div className="flex items-center gap-2 bg-bg1 p-2 rounded-md">
           <VscGraph className="text-secondary w-6 h-6" />
-          <p>Success Rate: {successRate}%</p>
+          <p>Success Rate: {Math.floor(successRate)}%</p>
         </div>
 
         <div className="flex items-center gap-2 bg-bg1 p-2 rounded-md">
           <p className="flex items-center">
-            {rating}
+            {Math.floor(rating)}
             <img src={star} alt="star" className="w-5 h-5 ml-2" />
           </p>
         </div>
@@ -54,4 +54,4 @@ const FeedCard = ({ name, category, rating, experience, location, fee, successRa
   );
 };
 
-export default FeedCard
+export default FeedCard;

@@ -13,7 +13,7 @@ const Home = () => {
     <>
       <section>
         {/* Hero Section */}
-        <div className="flex flex-col h-auto bg-cover bg-center" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
+        <div className="flex flex-col h-fit bg-cover bg-center" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
           <Header />
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold my-8 md:my-20 text-white text-center">
             Welcome!
