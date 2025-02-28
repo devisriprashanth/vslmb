@@ -3,14 +3,8 @@ import { useNavigate } from "react-router-dom";
 import "../../index.css";
 import form1 from "../../assets/img/caseform.jpg";
 import form2 from "../../assets/icons/drop_img.svg";
-import { createClient } from "@supabase/supabase-js";
+import supabase from "../../supabaseClient"; // 🔥 Import only once
 import toast from "react-hot-toast"; // Optional for Notifications
-
-// Supabase Connection
-const supabase = createClient(
-  "https://ifcivkmccvwvtcttucrc.supabase.co",
-  "your_anon_key_here"
-);
 
 const Upload = ({ uploadedFiles, setUploadedFiles }) => {
   const fileInputRef = useRef(null);
@@ -23,44 +17,57 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
   };
 
   const processFile = async (file) => {
-    if (file && file.type === "application/pdf") {
-      setIsLoading(true);
-      const fileName = `${Date.now()}_${file.name}`; // Rename File
+    if (!file) {
+      toast.error("No File Selected ❌");
+      return;
+    }
 
+    if (file.type !== "application/pdf") {
+      toast.error("Only PDF files allowed ❌");
+      return;
+    }
+
+    setIsLoading(true);
+    const fileName = `${Date.now()}_${file.name}`;
+
+    try {
       const { data, error } = await supabase.storage
-        .from("files") // Your Bucket Name
+        .from("files") // ✅ Bucket Name
         .upload(`documents/${fileName}`, file, {
           cacheControl: "3600",
-          upsert: false,
+          upsert: true,
         });
 
       if (error) {
+        console.log("Upload Error:", error);
         toast.error("Upload Failed ❌");
-        console.log(error);
-      } else {
-        const { data: urlData } = await supabase.storage
-          .from("files")
-          .getPublicUrl(`documents/${fileName}`);
-
-        setUploadedFiles((prev) => [
-          ...prev,
-          {
-            name: file.name,
-            size: (file.size / 1024).toFixed(2) + " KB",
-            date: new Date().toLocaleDateString(),
-            url: urlData.publicUrl,
-          },
-        ]);
-
-        toast.success("Uploaded Successfully ✅");
-        navigate("/review");
+        return;
       }
 
+      const { data: urlData } = await supabase.storage
+        .from("files")
+        .getPublicUrl(`documents/${fileName}`);
+
+      setUploadedFiles((prev) => [
+        ...prev,
+        {
+          name: file.name,
+          size: `${(file.size / 1024).toFixed(2)} KB`,
+          date: new Date().toLocaleDateString(),
+          url: urlData.publicUrl, // ✅ Correct URL
+        },
+      ]);
+
+      toast.success("Uploaded Successfully ✅");
+      navigate("/review");
+
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      toast.error("Something went wrong ❌");
+    } finally {
       setIsLoading(false);
-    } else {
-      toast.error("Only PDF files allowed ❌");
+      setIsDragging(false);
     }
-    setIsDragging(false);
   };
 
   const handleFileChange = (event) => {
