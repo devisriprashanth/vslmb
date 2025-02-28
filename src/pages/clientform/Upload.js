@@ -32,11 +32,11 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
 
     try {
       const { data, error } = await supabase.storage
-        .from("files") // ✅ Bucket Name
-        .upload(`documents/${fileName}`, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+      .from("files")
+      .upload(`documents/${fileName}`, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
 
       if (error) {
         console.log("Upload Error:", error);
