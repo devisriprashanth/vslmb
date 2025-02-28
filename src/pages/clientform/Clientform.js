@@ -4,52 +4,39 @@ import { useNavigate } from "react-router-dom";
 import form1 from "../../assets/img/caseform.jpg";
 import { CiLocationOn } from "react-icons/ci";
 import  supabase  from "../../supabaseClient";
+import toast from "react-hot-toast";
 
 
 
 const Clientform = () => {
   const navigate = useNavigate();
-
-  // State for Form Fields
   const [caseName, setCaseName] = useState("");
   const [category, setCategory] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
 
-  // Validation Function
-  const validateForm = () => {
-    if (!caseName || !category || !phoneNumber || !location || !description) {
-      alert("Please fill all fields");
-      return false;
-    }
-    if (phoneNumber.length !== 10) {
-      alert("Phone Number should be 10 digits");
-      return false;
-    }
-    return true;
-  };
-
-  // Submit Function
   const handleSubmit = async () => {
-    if (validateForm()) {
-      const { data, error } = await supabase.from("client_form").insert([
-        {
-          case_name: caseName,
-          category: category,
-          phone_number: phoneNumber,
-          location: location,
-          description: description,
-        },
-      ]);
+    if (!caseName || !category || !phoneNumber || !location || !description) {
+      toast.error("Fill all fields");
+      return;
+    }
 
-      if (error) {
-        alert("Submission Failed!");
-        console.error(error);
-      } else {
-        alert("Form Submitted Successfully ✅");
-        navigate("/filter");
-      }
+    const { data, error } = await supabase.from("client_form").insert([
+      {
+        case_name: caseName,
+        category: category,
+        phone_number: phoneNumber,
+        location: location,
+        description: description,
+      },
+    ]);
+
+    if (error) {
+      toast.error("Submission Failed");
+    } else {
+      toast.success("Form Submitted Successfully ✅");
+      navigate("/upload");
     }
   };
 

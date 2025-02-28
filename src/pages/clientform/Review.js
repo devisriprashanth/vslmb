@@ -4,8 +4,6 @@ import form1 from "../../assets/img/caseform.jpg";
 import supabase from "../../supabaseClient";
 import { toast } from "react-toastify";
 
-
-
 const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -14,7 +12,7 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
     const fileToRemove = uploadedFiles[indexToRemove];
     const filePath = fileToRemove.url.split("/storage/v1/object/public/")[1];
 
-    const { error } = await supabase.storage.from("law_docs").remove([filePath]);
+    const { error } = await supabase.storage.from("files").remove([filePath]);
 
     if (error) {
       toast.error("❌ Failed to delete file");
@@ -42,17 +40,19 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
     const uploaded = [];
     for (let file of pdfFiles) {
       const fileName = `${Date.now()}_${file.name}`;
+
       const { data, error } = await supabase.storage
         .from("files")
         .upload(`documents/${fileName}`, file, {
           cacheControl: "3600",
+          upsert: true,
         });
 
       if (error) {
         toast.error("❌ Upload Failed");
       } else {
         const { data: urlData } = await supabase.storage
-          .from("law_docs")
+          .from("files")
           .getPublicUrl(`documents/${fileName}`);
 
         uploaded.push({
@@ -70,13 +70,39 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
   };
 
   const handleSubmit = async () => {
-    setIsSubmitting(true);
-    if (uploadedFiles.length > 0) {
-      toast.success("✅ Case Files Submitted Successfully");
-    } else {
+    if (uploadedFiles.length === 0) {
       toast.error("❌ Please Upload Files Before Submitting");
+      return;
     }
-    setIsSubmitting(false);
+
+    setIsSubmitting(true);
+    try {
+      for (let file of uploadedFiles) {
+        const { data, error } = await supabase
+          .from("caseform")
+          .insert([
+            {
+              name: file.name,
+              size: file.size,
+              date: file.date,
+              url: file.url,
+            },
+          ]);
+
+        if (error) {
+          console.error("Insert Error:", error);
+          toast.error("❌ Something went wrong");
+          return;
+        }
+      }
+      toast.success("✅ Case Files Submitted Successfully");
+      setUploadedFiles([]);
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      toast.error("❌ Submission Failed");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -146,7 +172,7 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={isSubmitting || uploadedFiles.length === 0}
+                  disabled={isSubmitting}
                   className={`bg-secondary text-white text-lg rounded-md px-6 py-2 ${
                     isSubmitting ? "bg-gray-400 cursor-not-allowed" : ""
                   }`}

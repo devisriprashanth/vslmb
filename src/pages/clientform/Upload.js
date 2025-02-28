@@ -1,81 +1,86 @@
 import React, { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../index.css";
-import form1 from "../../assets/img/caseform.jpg";
-import form2 from "../../assets/icons/drop_img.svg";
-import supabase from "../../supabaseClient"; // 🔥 Import only once
-import toast from "react-hot-toast"; // Optional for Notifications
+import form1 from "../../assets/img/caseform.jpg"; // Background Image
+import form2 from "../../assets/icons/drop_img.svg"; // Upload Icon
+import supabase from "../../supabaseClient"; // Supabase Client
+import toast from "react-hot-toast"; // Notifications Library
 
 const Upload = ({ uploadedFiles, setUploadedFiles }) => {
-  const fileInputRef = useRef(null);
+  const fileInputRef = useRef(null); // File Input Reference
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
+  // 🔥 Open File Dialog
   const handleButtonClick = () => {
     fileInputRef.current.click();
   };
 
+  // 🎯 File Upload Function
   const processFile = async (file) => {
     if (!file) {
-      toast.error("No File Selected ❌");
+      toast.error("❌ No File Selected");
       return;
     }
 
     if (file.type !== "application/pdf") {
-      toast.error("Only PDF files allowed ❌");
+      toast.error("❌ Only PDF files are allowed");
       return;
     }
 
     setIsLoading(true);
-    const fileName = `${Date.now()}_${file.name}`;
+    const fileName = `${Date.now()}_${file.name}`; // Unique File Name
 
     try {
+      // 🔥 Upload PDF to Supabase Storage
       const { data, error } = await supabase.storage
-      .from("files")
-      .upload(`documents/${fileName}`, file, {
-        cacheControl: "3600",
-        upsert: true,
-      });
+        .from("files")
+        .upload(`documents/${fileName}`, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
 
       if (error) {
         console.log("Upload Error:", error);
-        toast.error("Upload Failed ❌");
+        toast.error("❌ Upload Failed");
         return;
       }
 
+      // ✅ Get Public URL
       const { data: urlData } = await supabase.storage
-      .from("files")
-      .getPublicUrl(`documents/${fileName}`);
+        .from("files")
+        .getPublicUrl(`documents/${fileName}`);
 
-
+      // 📌 Add File to State
       setUploadedFiles((prev) => [
         ...prev,
         {
           name: file.name,
           size: `${(file.size / 1024).toFixed(2)} KB`,
           date: new Date().toLocaleDateString(),
-          url: urlData.publicUrl, // ✅ Correct URL
+          url: urlData.publicUrl,
         },
       ]);
 
-      toast.success("Uploaded Successfully ✅");
+      toast.success("✅ File Uploaded Successfully");
       navigate("/review");
-
     } catch (err) {
       console.error("Unexpected Error:", err);
-      toast.error("Something went wrong ❌");
+      toast.error("❌ Something went wrong");
     } finally {
       setIsLoading(false);
       setIsDragging(false);
     }
   };
 
+  // 📌 File Input Change Event
   const handleFileChange = (event) => {
     const file = event.target.files[0];
     processFile(file);
   };
 
+  // Drag & Drop Events
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -99,18 +104,20 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
         style={{ backgroundImage: `url(${form1})` }}
       >
         <div
-          className={`bg-bg/70 rounded-xl p-6 flex flex-col items-center w-full max-w-lg ${
-            isDragging ? "bg-gray-200" : ""
+          className={`bg-white/80 rounded-xl p-8 text-center w-full max-w-lg ${
+            isDragging ? "border-2 border-dashed border-secondary" : ""
           }`}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
           <img src={form2} alt="upload" className="w-40 h-auto mb-4" />
-          <h1 className="text-secondary text-xl text-center mb-4">
-            {isDragging ? "Drop your PDF here" : "Drag & Drop your PDF"}
+          <h1 className="text-xl font-semibold text-secondary mb-4">
+            {isDragging ? "Drop your PDF Here" : "Drag & Drop your PDF"}
           </h1>
-          <span className="text-gray-600 mb-4">or</span>
+          <span className="text-gray-500 mb-4 block">or</span>
+
+          {/* Hidden File Input */}
           <input
             type="file"
             ref={fileInputRef}
@@ -118,9 +125,11 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
             className="hidden"
             onChange={handleFileChange}
           />
+
           <button
             onClick={handleButtonClick}
-            className="w-full bg-secondary text-white text-lg rounded-md p-2 hover:shadow-xl cursor-pointer"
+            className="bg-secondary text-white text-lg rounded-lg w-full py-2 hover:shadow-lg transition-all"
+            disabled={isLoading}
           >
             {isLoading ? "Uploading..." : "Select your PDF"}
           </button>

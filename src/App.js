@@ -27,8 +27,8 @@ function App() {
         <Route path="/register" element={<Register/>}></Route>
         <Route path="/lawyer-form" element={<LawyerForm/>}></Route>
         <Route path="/caseform/:id" element={<Clientform />} />
-        <Route path="/upload" element={<Upload/>}></Route>
-        <Route path="/review" element={<Review/>}></Route>
+        <Route path="/upload" element={<Upload setUploadedFiles={setUploadedFiles}/>}></Route>
+        <Route path="/review" element={<Review uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>}></Route>
         <Route path="/filter" element={<Filter/>}></Route>
         <Route path="/client-dashboard" element={<ClientDash/>}></Route>
         <Route path="/lawyer-dashboard" element={<LawyerDash/>}></Route>
