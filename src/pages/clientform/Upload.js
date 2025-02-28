@@ -33,7 +33,7 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
     try {
       const { data, error } = await supabase.storage
         .from("files") // ✅ Bucket Name
-        .upload(`documents/${fileName}`, file, {
+        .upload(`${fileName}`, file, {
           cacheControl: "3600",
           upsert: true,
         });
