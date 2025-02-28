@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import supabase from "../../supabaseClient";
@@ -8,12 +8,29 @@ const Clientform = () => {
   const locationHook = useLocation();
   const { state } = locationHook;
 
+  // ✅ Get active logged-in user from localStorage
+  const [clientId, setClientId] = useState(null);
+  useEffect(() => {
+    const storedUserId = localStorage.getItem("id");
+    if (storedUserId) {
+      setClientId(storedUserId);
+    } else {
+      toast.error("User not logged in ❌");
+      navigate("/login"); // Redirect if not logged in
+    }
+  }, [navigate]);
+
+  // ✅ Extract lawyer_id from URL
+  const lawyerId = locationHook.pathname.split("/")[2];
+
+  // ✅ State for form inputs
   const [caseName, setCaseName] = useState("");
   const [category, setCategory] = useState(state?.category || "");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [location, setLocation] = useState(state?.location || "");
   const [description, setDescription] = useState("");
 
+  // ✅ Handle Form Submission
   const handleSubmit = async () => {
     if (!caseName || !category || !phoneNumber || !location || !description) {
       toast.error("Please Fill All Fields");
@@ -25,35 +42,29 @@ const Clientform = () => {
       return;
     }
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      toast.error("User Not Authenticated");
+    if (!clientId) {
+      toast.error("Client ID not found ❌");
       return;
     }
 
-    const lawyerId = locationHook.pathname.split("/")[2]; // Getting lawyer id from URL
-
-    const { error } = await supabase
-      .from("caseform")
-      .insert([
-        {
-          client_id: user.id,
-          lawyer_id: lawyerId,
-          case_name: caseName,
-          category: category,
-          phone_number: phoneNumber,
-          location: location,
-          description: description,
-        },
-      ]);
+    const { error } = await supabase.from("caseform").insert([
+      {
+        client_id: clientId,
+        lawyer_id: lawyerId,
+        case_name: caseName,
+        category: category,
+        phone_number: phoneNumber,
+        location: location,
+        description: description,
+      },
+    ]);
 
     if (error) {
       console.error("Upload Error:", error);
       toast.error("Submission Failed ❌");
     } else {
       toast.success("Form Submitted Successfully ✅");
-      navigate("/upload");
+      navigate("/upload"); // Redirect on success
     }
   };
 
@@ -61,6 +72,7 @@ const Clientform = () => {
     <div className="w-full h-screen flex justify-center items-center">
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-center mb-4 text-xl font-bold">Case Details</h2>
+        
         <input
           type="text"
           placeholder="Case Name"
@@ -68,6 +80,7 @@ const Clientform = () => {
           onChange={(e) => setCaseName(e.target.value)}
           className="p-2 border rounded w-full mb-2"
         />
+
         <input
           type="tel"
           placeholder="Phone Number"
@@ -76,6 +89,7 @@ const Clientform = () => {
           onChange={(e) => setPhoneNumber(e.target.value)}
           className="p-2 border rounded w-full mb-2"
         />
+
         <textarea
           placeholder="Description"
           value={description}
