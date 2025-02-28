@@ -37,10 +37,9 @@ const Header = () => {
         <div className="flex items-center gap-4 relative">
           {/* Hide Filter for Lawyer */}
           {!isLawyer && (
-            <FaFilter
-              className="text-2xl text-third cursor-pointer"
-              onClick={() => navigate('/filter')}
-            />
+             <div onClick={() => navigate('/filter')} className="cursor-pointer">
+             <FaFilter className="text-2xl text-third"/>
+           </div>
           )}
 
           <div className="flex items-center gap-2 cursor-pointer">

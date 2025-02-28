@@ -1,3 +1,4 @@
+// Filter.jsx
 import React, { useState, useEffect } from 'react';
 import Header from '../../component/Header';
 import FilterSection from './FilterSection';
@@ -15,7 +16,7 @@ const Filter = () => {
     rating: [],
     successRate: 0,
     experience: 1,
-    categories: [],
+    categories: [], // This will hold both locations and lawyer categories
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFeed, setSelectedFeed] = useState(null);
@@ -50,15 +51,43 @@ const Filter = () => {
   };
 
   const parseExperienceYears = (experience) => {
+    // Handle experience field which might be a string like "10 years"
+    if (typeof experience === 'string') {
+      return parseInt(experience.replace(/[^0-9]/g, '')) || 0;
+    }
     return experience || 0;
   };
 
+  // Filter the feedData based on the selected filters
   const filteredFeedData = feedData.filter((feed) => {
-    const ratingMatch = filters.rating.length === 0 || filters.rating.includes(feed.rating.toString());
-    const successRateMatch = filters.successRate === 0 || feed.success_rate <= filters.successRate;
-    const experienceMatch = parseExperienceYears(feed.experience) >= filters.experience;
-    const categoryMatch = filters.categories.length === 0 || filters.categories.includes(feed.category);
-    return ratingMatch && successRateMatch && experienceMatch && categoryMatch;
+    // Rating Filter
+    const ratingMatch =
+      filters.rating.length === 0 ||
+      filters.rating.includes(Math.floor(feed.rating).toString());
+
+    // Success Rate Filter
+    const successRateMatch =
+      filters.successRate === 0 ||
+      feed.success_rate <= filters.successRate;
+
+    // Experience Filter
+    const experienceMatch =
+      parseExperienceYears(feed.experience) >= filters.experience;
+
+    // Categories Filter (includes both locations and lawyer categories)
+    const locationMatch =
+      filters.categories.length === 0 ||
+      filters.categories.includes(feed.location);
+
+    const categoryMatch =
+      filters.categories.length === 0 ||
+      filters.categories.includes(feed.category);
+
+    // Combine location and category match (at least one should match if filters are applied)
+    const combinedCategoryMatch =
+      filters.categories.length === 0 || locationMatch || categoryMatch;
+
+    return ratingMatch && successRateMatch && experienceMatch && combinedCategoryMatch;
   });
 
   const handleFeedClick = (feed) => {
@@ -72,37 +101,46 @@ const Filter = () => {
   };
 
   return (
-    <section className='w-full min-h-screen bg-cover bg-center' style={{ backgroundImage: `url(${bg})` }}>
+    <section className="w-full min-h-screen bg-cover bg-center" style={{ backgroundImage: `url(${bg})` }}>
       <Header />
 
-      <button
-        className="bg-white/70 backdrop-blur-md p-4 rounded-lg m-5 shadow-lg flex items-center justify-between w-full max-w-sm"
-        onClick={() => setIsFilterOpen(!isFilterOpen)}
-      >
-        <span className="text-lg font-bold text-black">Filters</span>
-        <span className="text-black">▼</span>
-      </button>
+      {/* Filter Button and Section */}
+      <div className="relative w-full max-w-sm mx-5 mt-5">
+        <button
+          className="bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-lg flex items-center justify-between w-full"
+          onClick={() => setIsFilterOpen(!isFilterOpen)}
+        >
+          <span className="text-lg font-bold text-black">Filters</span>
+          <span className="text-black">{isFilterOpen ? '▲' : '▼'}</span>
+        </button>
 
-      {isFilterOpen && (
-        <div className="bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-lg w-full max-w-sm mx-5">
-          <FilterSection onFilterChange={handleFilterChange} filters={filters} />
-        </div>
-      )}
+        {/* Filter Section with absolute positioning */}
+        {isFilterOpen && (
+          <div className="absolute top-16 left-0 bg-white/70 backdrop-blur-md p-4 rounded-lg shadow-xl w-full z-10 max-h-[400px] overflow-y-auto border border-gray-200">
+            <FilterSection onFilterChange={handleFilterChange} filters={filters} />
+          </div>
+        )}
+      </div>
 
+      {/* Cards Section */}
       <div className="w-full p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredFeedData.map((feed, index) => (
-          <FeedCard
-            key={index}
-            name={feed.first_name}
-            category={feed.category}
-            location={feed.location}
-            fee={feed.price}
-            experience={`${feed.experience} years`}
-            successRate={feed.success_rate}
-            rating={feed.rating.toFixed(1)}
-            onClick={() => handleFeedClick(feed)}
-          />
-        ))}
+        {filteredFeedData.length > 0 ? (
+          filteredFeedData.map((feed, index) => (
+            <FeedCard
+              key={index}
+              name={feed.first_name}
+              category={feed.category}
+              location={feed.location}
+              fee={feed.price}
+              experience={feed.experience}
+              successRate={feed.success_rate}
+              rating={feed.rating}
+              onClick={() => handleFeedClick(feed)}
+            />
+          ))
+        ) : (
+          <p className="text-white text-center col-span-full">No lawyers found matching the selected filters.</p>
+        )}
       </div>
 
       {isModalOpen && <FeedModal lawyer={selectedFeed} onClose={handleCloseModal} />}

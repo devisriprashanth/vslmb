@@ -51,7 +51,7 @@ const Register = () => {
           isLawyerSelected ? "md:text-right md:order-2" : "md:text-left md:order-1"
         }`}
       >
-        <h1 className="text-white text-2xl md:text-3xl font-bold">SLMB</h1>
+        <h1 className="text-white text-2xl md:text-3xl font-bold cursor-pointer" onClick={() => navigate('/')}>SLMB</h1>
         <p className="text-sm text-white font-medium mt-2">Your trusted legal partner</p>
       </div>
 

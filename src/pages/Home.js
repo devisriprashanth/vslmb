@@ -13,22 +13,25 @@ const Home = () => {
     <>
       <section>
         {/* Hero Section */}
-        <div className="relative min-h-screen bg-cover bg-center px-6" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
-          <Header/>
-          <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-6">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
-            Welcome!
-          </h1>
-          <p className="mt-4 md:mt-6 text-lg sm:text-xl md:text-2xl max-w-3xl">
+        <div className="flex flex-col relative min-h-screen bg-cover bg-center px-6" style={{ backgroundImage: "url('/assets/Hero.jpg')" }}>
+          <Header />
+          <div className=" absolute my-20 inset-0  flex flex-col justify-center items-center text-center text-white px-6">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
+          Welcome!
+        </h1>
+
+        <p className="mt-4 md:mt-6 text-lg sm:text-xl md:text-2xl max-w-3xl">
           Explore a world of endless possibilities. Discover, learn, and grow
           with our exclusive resources and expert guidance.
-          </p>
-          <div className='mt-8'>
-            <button className='text-white bg-secondary flex items-center px-6 py-3 rounded-lg text-lg hover:bg-green-800 transition' onClick={() => navigate('/login')}>
-              Get Started <FaArrowRight className='ml-2' />
-            </button>
-          </div>
-          </div>
+        </p>
+
+        <div className="mt-8">
+          <button className="text-white bg-green-700 flex items-center px-6 py-3 rounded-lg text-lg hover:bg-green-800 transition" onClick={() => navigate('/login')}>
+            Get Started <FaArrowRight className="ml-2" />
+          </button>
+        </div>
+      </div>
+
         </div>
 
         {/* How It Works Section */}

@@ -1,3 +1,4 @@
+// FeedCard.jsx (Provided, unchanged)
 import React from 'react';
 import { FaBriefcase, FaMapLocationDot, FaUserTie } from "react-icons/fa6";
 import { GiMoneyStack } from "react-icons/gi";
