@@ -114,15 +114,6 @@ const Settings = () => {
             )}
           </div>
         </div>
-        <div className="bg-yellow-200 text-yellow-900 p-4 rounded-lg shadow-md mb-6 flex justify-between items-center">
-        <p className="font-semibold">Please fill out the required form to complete your profile.</p>
-        <button
-          className="bg-yellow-600 text-white px-4 py-2 rounded"
-          onClick={() => navigate('/lawyer-form')}
-        >
-          Fill Form
-        </button>
-      </div>
 
       <div className="flex flex-col items-center p-4">
         <div className="bg-white/70 backdrop-blur-md p-6 rounded-lg shadow-lg w-full max-w-xl glass-effect">
