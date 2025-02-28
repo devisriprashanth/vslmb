@@ -17,8 +17,8 @@ const Home = () => {
           className="relative min-h-screen bg-cover bg-center px-6"
           style={{ backgroundImage: "url('/assets/Hero.jpg')" }}
         >
-          <Header /> {/* Navbar stays at the top */}
-          {/* Centered Content */}
+          <Header /> 
+          
           <div className="absolute inset-0 flex flex-col justify-center items-center text-center text-white px-6">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold">
               Welcome!
