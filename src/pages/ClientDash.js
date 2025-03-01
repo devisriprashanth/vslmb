@@ -4,13 +4,6 @@ import Header from '../component/Header';
 const ClientDash = () => {
 
 
-
-  const cases = [
-    { caseName: "Divorce", category: "Civil", file: "details.pdf", description: "Description" },
-    { caseName: "Deforestation", category: "Environmental", file: "details.pdf", description: "Description" },
-    { caseName: "Murder Case", category: "Criminal", file: "details.pdf", description: "Description" },
-  ];
-
   return (
     <div 
       className="min-h-screen w-full flex flex-col items-center bg-cover bg-center"
@@ -48,14 +41,7 @@ const ClientDash = () => {
                 </tr>
               </thead>
               <tbody>
-                {cases.map((item, index) => (
-                  <tr key={index} className="border-b text-sm md:text-lg">
-                    <td className="py-3 px-4">{item.caseName}</td>
-                    <td className="py-3 px-4">{item.category}</td>
-                    <td className="py-3 px-4 text-blue-600 cursor-pointer hover:underline">{item.file}</td>
-                    <td className="py-3 px-4">{item.description}</td>
-                  </tr>
-                ))}
+                no data available
               </tbody>
             </table>
           </div>
