@@ -14,7 +14,6 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    navigate('/login');
 
     const table = isLawyerSelected ? "lawyers" : "clients";
 
