@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../../index.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import form1 from "../../assets/img/caseform.jpg";
@@ -15,25 +15,42 @@ const Clientform = () => {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
 
+  // Check if the user is authenticated when the component mounts
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (!user || error) {
+        toast.error("Please log in to submit a case.");
+        navigate("/login");
+      }
+    };
+    checkAuth();
+  }, [navigate]);
+
   const handleSubmit = async () => {
+    // Validate required fields
     if (!caseName || !category || !phoneNumber || !location || !description) {
       toast.error("Please Fill All Fields");
       return;
     }
-  
+
+    // Validate phone number length
     if (phoneNumber.length !== 10) {
       toast.error("Invalid Phone Number");
       return;
     }
-  
+
+    // Get the authenticated user (client) for client_id
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     
     if (authError || !user) {
       toast.error("User Not Authenticated");
       console.error("Auth Error:", authError);
+      navigate("/login");
       return;
     }
-  
+
+    // Insert into the caseform table
     const { data, error } = await supabase
       .from("caseform")
       .insert([
@@ -47,7 +64,7 @@ const Clientform = () => {
           description: description,
         },
       ]);
-  
+
     if (error) {
       console.error("Upload Error:", error);
       toast.error("Submission Failed ❌");
@@ -56,7 +73,6 @@ const Clientform = () => {
       navigate("/upload");
     }
   };
-  
 
   return (
     <>

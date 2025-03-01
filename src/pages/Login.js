@@ -10,34 +10,56 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // ✅ Login Handler Function
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    const table = isLawyerSelected ? "lawyers" : "clients"; // Dynamic Table Selection
+    // Authenticate with Supabase
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    const { data, error } = await supabase
+    if (authError) {
+      alert("Invalid Credentials ❌");
+      console.log("Auth Error:", authError.message);
+      return;
+    }
+
+    // Get the authenticated user
+    const { data: { user } } = authData;
+
+    // Determine which table to query based on isLawyerSelected
+    const table = isLawyerSelected ? "lawyers" : "clients";
+
+    // Fetch additional user data from the appropriate table
+    const { data: userData, error: userError } = await supabase
       .from(table)
       .select("*")
-      .eq("email", email)
-      .eq("password", password) // Matching Email & Password
-      .single(); // Return Single User
+      .eq("auth_id", user.id) // Match the auth_id with the authenticated user's ID
+      .single();
 
-    if (data) {
-      localStorage.setItem("user", JSON.stringify({ first_name: data.first_name, isLawyerSelected }));
-      localStorage.setItem("id", data.id);
-      localStorage.setItem("first_name", data.first_name);
+    if (userError || !userData) {
+      alert("User not found in database ❌");
+      console.log("User Fetch Error:", userError?.message);
+      await supabase.auth.signOut(); // Sign out if user not found in table
+      return;
+    }
 
-      alert("Login Successful ✅");
+    // Store user data in localStorage (optional, since Header.js already syncs with Supabase auth)
+    localStorage.setItem("user", JSON.stringify({
+      first_name: userData.first_name,
+      isLawyerSelected,
+    }));
+    localStorage.setItem("id", userData.id);
+    localStorage.setItem("first_name", userData.first_name);
 
-      if (isLawyerSelected) {
-        navigate("/lawyer-dashboard");
-      } else {
-        navigate("/client-dashboard");
-      }
+    alert("Login Successful ✅");
+
+    // Navigate to the appropriate dashboard
+    if (isLawyerSelected) {
+      navigate("/lawyer-dashboard");
     } else {
-      alert("Invalid Credentials ❌");
-      console.log(error?.message);
+      navigate("/client-dashboard");
     }
   };
 
@@ -49,8 +71,7 @@ const Login = () => {
       }}
     >
       <div
-        className={`md:flex-1 w-full p-4 my-10 md:my-0 md:p-10 text-center ${isLawyerSelected ? "md:text-right md:order-2" : "md:text-left md:order-1"
-          }`}
+        className={`md:flex-1 w-full p-4 my-10 md:my-0 md:p-10 text-center ${isLawyerSelected ? "md:text-right md:order-2" : "md:text-left md:order-1"}`}
       >
         <h1 className="text-white text-2xl md:text-3xl font-bold cursor-pointer" onClick={() => navigate('/')}>SLMB</h1>
         <p className="text-sm text-white font-medium mt-2">
@@ -61,8 +82,7 @@ const Login = () => {
       <div
         className={`bg-white shadow-lg h-auto md:h-full p-6 md:p-10 w-full md:max-w-md ${isLawyerSelected
           ? "md:rounded-tr-[70px] md:rounded-br-[70px] md:order-1"
-          : "md:rounded-tl-[70px] md:rounded-bl-[70px] md:order-2"
-          }`}
+          : "md:rounded-tl-[70px] md:rounded-bl-[70px] md:order-2"}`}
       >
         <h1 className="text-3xl font-bold text-center mb-4">Login</h1>
         <p className="text-center text-gray-600 mb-4">
@@ -78,15 +98,13 @@ const Login = () => {
         {/* User Type Selection */}
         <div className="flex justify-center gap-4 mb-4">
           <button
-            className={`px-4 py-2 rounded-md border ${!isLawyerSelected ? "bg-secondary text-white" : "bg-white text-secondary"
-              }`}
+            className={`px-4 py-2 rounded-md border ${!isLawyerSelected ? "bg-secondary text-white" : "bg-white text-secondary"}`}
             onClick={() => setIsLawyerSelected(false)}
           >
             Client
           </button>
           <button
-            className={`px-4 py-2 rounded-md border ${isLawyerSelected ? "bg-secondary text-white" : "bg-white text-secondary"
-              }`}
+            className={`px-4 py-2 rounded-md border ${isLawyerSelected ? "bg-secondary text-white" : "bg-white text-secondary"}`}
             onClick={() => setIsLawyerSelected(true)}
           >
             Lawyer

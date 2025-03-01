@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserAlt, FaFilter } from "react-icons/fa";
 import '../index.css';
+import supabase from '../supabaseClient'; // Import Supabase client
 
 const Header = () => {
   const navigate = useNavigate();
@@ -10,16 +11,54 @@ const Header = () => {
   const [isLawyer, setIsLawyer] = useState(false);
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if (storedUser) {
-      setUserName(storedUser.first_name);
-      setIsLawyer(storedUser.isLawyerSelected); // ✅ Get Lawyer or Client Status
-    }
-  }, []);
+    const fetchUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (user && !error) {
+        setUserName(user.user_metadata?.first_name || ''); // Adjust based on your user metadata
+        setIsLawyer(user.user_metadata?.isLawyerSelected || false); // Adjust based on your user metadata
+        // Optionally store in localStorage for persistence, but don't rely on it as the source of truth
+        localStorage.setItem("user", JSON.stringify({
+          first_name: user.user_metadata?.first_name,
+          isLawyerSelected: user.user_metadata?.isLawyerSelected,
+        }));
+      } else {
+        setUserName('');
+        setIsLawyer(false);
+        localStorage.removeItem("user");
+      }
+    };
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
+    fetchUser();
+
+    // Listen for auth state changes (e.g., sign-in, sign-out, token refresh)
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
+        setUserName(session.user.user_metadata?.first_name || '');
+        setIsLawyer(session.user.user_metadata?.isLawyerSelected || false);
+        localStorage.setItem("user", JSON.stringify({
+          first_name: session.user.user_metadata?.first_name,
+          isLawyerSelected: session.user.user_metadata?.isLawyerSelected,
+        }));
+      } else if (event === 'SIGNED_OUT') {
+        setUserName('');
+        setIsLawyer(false);
+        localStorage.removeItem("user");
+        navigate("/login");
+      }
+    });
+
+    // Cleanup the listener on component unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [navigate]);
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error("Logout Error:", error);
+    }
+    // The onAuthStateChange listener will handle clearing the state and navigating to login
   };
 
   return (
@@ -35,11 +74,10 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-4 relative">
-          {/* Hide Filter for Lawyer */}
           {!isLawyer && (
-             <div onClick={() => navigate('/filter')} className="cursor-pointer">
-             <FaFilter className="text-2xl text-third"/>
-           </div>
+            <div onClick={() => navigate('/filter')} className="cursor-pointer">
+              <FaFilter className="text-2xl text-third"/>
+            </div>
           )}
 
           <div className="flex items-center gap-2 cursor-pointer">
@@ -50,7 +88,7 @@ const Header = () => {
                   {userName}
                 </h1>
                 {toggle && (
-                  <div className="absolute right-0 top-7 bg-white border shadow-lg rounded-lg ">
+                  <div className="absolute right-0 top-7 bg-white border shadow-lg rounded-lg">
                     <button
                       onClick={handleLogout}
                       className="text-red-500 w-full text-left hover:bg-gray-200 px-1 rounded-md"
