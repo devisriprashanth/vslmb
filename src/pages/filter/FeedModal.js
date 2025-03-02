@@ -8,27 +8,53 @@ import supabase from '../../supabaseClient'; // Import Supabase client
 import toast from "react-hot-toast";
 
 const FeedModal = ({ lawyer, onClose }) => {
+  console.log(lawyer);
   const navigate = useNavigate();
-
+  //testing user id presnet or not
+  const userId = localStorage.getItem("id");
+  console.log(userId)
   if (!lawyer) return null;
 
-  const handleUpload = async () => {
-    // Check if the user is authenticated before navigating
-    const { data: { user }, error } = await supabase.auth.getUser();
-    if (!user || error) {
+  // const handleUpload = async () => {
+  //   // Check if the user is authenticated before navigating
+  //   const { data: { user }, error } = await supabase.auth.getUser();
+  //   if (!user || error) {
+  //     toast.error("Please log in to submit a case.");
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   // If authenticated, navigate to the case form
+  //   navigate(`/caseform/${lawyer.id}`, {
+  //     state: {
+  //       category: lawyer.category,
+  //       location: lawyer.location,
+  //     }
+  //   });
+  // };
+  const handleUpload = () => {
+    const userId = localStorage.getItem("id");
+  
+    console.log("User ID from localStorage:", userId);
+  
+    if (!userId || userId === "null" || userId === "undefined") {
       toast.error("Please log in to submit a case.");
       navigate("/login");
       return;
     }
-
-    // If authenticated, navigate to the case form
-    navigate(`/caseform/${lawyer.id}`, {
+  
+    console.log("Navigating to caseform...");
+    navigate(`/caseform/${lawyer.uid}`, {
       state: {
         category: lawyer.category,
         location: lawyer.location,
       }
     });
   };
+  
+  
+  
+  
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50">

@@ -23,19 +23,34 @@ const Filter = () => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Fetch Data from Backend
+  // useEffect(() => {
+  //   const fetchLawyers = async () => {
+  //     const { data, error } = await supabase.from("lawyers_form").select("*");
+
+  //     if (error) {
+  //       console.error("Failed to fetch lawyers data:", error);
+  //     } else {
+  //       setFeedData(data);
+  //     }
+  //   };
+
+  //   fetchLawyers();
+  // }, []);
   useEffect(() => {
     const fetchLawyers = async () => {
-      const { data, error } = await supabase.from("lawyers_form").select("*");
-
-      if (error) {
-        console.error("Failed to fetch lawyers data:", error);
-      } else {
+      try {
+        const { data, error } = await supabase.from("lawyers_form").select("*");
+        
+        if (error) throw error;
+        
         setFeedData(data);
+      } catch (err) {
+        console.error("Failed to fetch lawyers data:", err.message);
       }
     };
 
     fetchLawyers();
-  }, []);
+  }, []); 
 
   const handleFilterChange = (filterType, value) => {
     setFilters((prevFilters) => {

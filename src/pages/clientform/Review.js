@@ -3,11 +3,17 @@ import "../../index.css";
 import form1 from "../../assets/img/caseform.jpg";
 import supabase from "../../supabaseClient";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+   const { user, lawyerId } = useParams();
+    console.log("Client ID from URL:", user);
+    console.log("Lawyer ID from URL:", lawyerId);
+const navigate = useNavigate();
   const handleRemoveFile = async (indexToRemove) => {
     const fileToRemove = uploadedFiles[indexToRemove];
     const filePath = fileToRemove.url.split("/storage/v1/object/public/")[1];
@@ -52,7 +58,7 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
         toast.error("❌ Upload Failed");
       } else {
         const { data: urlData } = await supabase.storage
-          .from("files")
+          .from("case-files")
           .getPublicUrl(`documents/${fileName}`);
 
         uploaded.push({
@@ -69,34 +75,71 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
     e.target.value = "";
   };
 
+  // const handleSubmit = async () => {
+  //   if (uploadedFiles.length === 0) {
+  //     toast.error("❌ Please Upload Files Before Submitting");
+  //     return;
+  //   }
+
+  //   setIsSubmitting(true);
+  //   try {
+  //     for (let file of uploadedFiles) {
+  //       const { data, error } = await supabase
+  //         .from("caseform")
+  //         .insert([
+  //           {
+  //             name: file.name,
+  //             size: file.size,
+  //             date: file.date,
+  //             url: file.url,
+  //           },
+  //         ]);
+
+  //       if (error) {
+  //         console.error("Insert Error:", error);
+  //         toast.error("❌ Something went wrong");
+  //         return;
+  //       }
+  //     }
+  //     toast.success("✅ Case Files Submitted Successfully");
+  //     setUploadedFiles([]);
+  //   } catch (err) {
+  //     console.error("Unexpected Error:", err);
+  //     toast.error("❌ Submission Failed");
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
   const handleSubmit = async () => {
     if (uploadedFiles.length === 0) {
       toast.error("❌ Please Upload Files Before Submitting");
       return;
     }
-
+  
     setIsSubmitting(true);
     try {
       for (let file of uploadedFiles) {
+       console.log(file.url)
         const { data, error } = await supabase
           .from("caseform")
-          .insert([
-            {
-              name: file.name,
-              size: file.size,
-              date: file.date,
-              url: file.url,
-            },
-          ]);
-
+          .update({
+            client_pdf: file.url,
+            lawyer_pdf: file.url,
+          })
+          .eq("client_id", user)
+          .eq("lawyer_id", lawyerId)
+          .is("client_pdf", null)
+          .is("lawyer_pdf", null);
         if (error) {
-          console.error("Insert Error:", error);
+          console.error("Update Error:", error);
           toast.error("❌ Something went wrong");
           return;
         }
       }
+  
       toast.success("✅ Case Files Submitted Successfully");
-      setUploadedFiles([]);
+      // setUploadedFiles([]);
+      navigate(`/filter`);
     } catch (err) {
       console.error("Unexpected Error:", err);
       toast.error("❌ Submission Failed");
@@ -104,6 +147,8 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
       setIsSubmitting(false);
     }
   };
+  
+  
 
   return (
     <>
@@ -163,13 +208,8 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
                   </tbody>
                 </table>
               </div>
-              <div className="flex flex-col gap-4 md:flex-row justify-center">
-                <button
-                  onClick={handleUploadClick}
-                  className="bg-secondary text-white text-lg rounded-md px-6 py-2 hover:shadow-xl"
-                >
-                  Upload More
-                </button>
+              {/* Centering the Submit Button */}
+              <div className="flex justify-center">
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
@@ -196,6 +236,7 @@ const Review = ({ uploadedFiles = [], setUploadedFiles = () => {} }) => {
       </section>
     </>
   );
+  
 };
 
 export default Review;

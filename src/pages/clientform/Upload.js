@@ -5,13 +5,16 @@ import form1 from "../../assets/img/caseform.jpg"; // Background Image
 import form2 from "../../assets/icons/drop_img.svg"; // Upload Icon
 import supabase from "../../supabaseClient"; // Supabase Client
 import toast from "react-hot-toast"; // Notifications Library
+import { useParams } from "react-router-dom";
 
 const Upload = ({ uploadedFiles, setUploadedFiles }) => {
   const fileInputRef = useRef(null); // File Input Reference
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-
+  const { user, lawyerId } = useParams();
+  console.log("Client ID from URL:", user);
+  console.log("Lawyer ID from URL:", lawyerId);
   // 🔥 Open File Dialog
   const handleButtonClick = () => {
     fileInputRef.current.click();
@@ -35,7 +38,7 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
     try {
       // 🔥 Upload PDF to Supabase Storage
       const { data, error } = await supabase.storage
-        .from("files")
+        .from("case-files")
         .upload(`documents/${fileName}`, file, {
           cacheControl: "3600",
           upsert: true,
@@ -49,7 +52,7 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
 
       // ✅ Get Public URL
       const { data: urlData } = await supabase.storage
-        .from("files")
+        .from("case-files")
         .getPublicUrl(`documents/${fileName}`);
 
       // 📌 Add File to State
@@ -64,7 +67,7 @@ const Upload = ({ uploadedFiles, setUploadedFiles }) => {
       ]);
 
       toast.success("✅ File Uploaded Successfully");
-      navigate("/review");
+      navigate(`/review/${user}/${lawyerId}`);
     } catch (err) {
       console.error("Unexpected Error:", err);
       toast.error("❌ Something went wrong");

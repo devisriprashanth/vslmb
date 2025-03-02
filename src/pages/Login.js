@@ -13,33 +13,36 @@ const Login = () => {
   // ✅ Login Handler Function
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    const table = isLawyerSelected ? "lawyers" : "clients"; // Dynamic Table Selection
-
+  
+    const table = isLawyerSelected ? "lawyers" : "clients";
+  
     const { data, error } = await supabase
       .from(table)
       .select("*")
       .eq("email", email)
-      .eq("password", password) // Matching Email & Password
-      .single(); // Return Single User
-
-    if (data) {
-      localStorage.setItem("user", JSON.stringify({ first_name: data.first_name, isLawyerSelected }));
-      localStorage.setItem("id", data.id);
-      localStorage.setItem("first_name", data.first_name);
-
-      alert("Login Successful ✅");
-
-      if (isLawyerSelected) {
-        navigate("/lawyer-dashboard");
-      } else {
-        navigate("/client-dashboard");
-      }
-    } else {
-      alert("Invalid Credentials ❌");
-      console.log(error?.message);
+      .single(); // First, check email only
+  
+    if (error || !data) {
+      alert("Invalid Email ❌");
+      return;
     }
+  
+    // Now check password manually
+    if (data.password !== password) {
+      alert("Invalid Password ❌");
+      return;
+    }
+  
+    // Store user data in localStorage
+    localStorage.setItem("user", JSON.stringify({ first_name: data.first_name, isLawyerSelected }));
+    localStorage.setItem("id", data.id);
+    localStorage.setItem("first_name", data.first_name);
+  
+    alert("Login Successful ✅");
+  
+    navigate(isLawyerSelected ? "/lawyer-dashboard" : "/client-dashboard");
   };
+  
 
   return (
     <section

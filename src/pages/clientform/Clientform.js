@@ -5,6 +5,8 @@ import form1 from "../../assets/img/caseform.jpg";
 import { CiLocationOn } from "react-icons/ci";
 import supabase from "../../supabaseClient";
 import toast from "react-hot-toast";
+import { useParams } from "react-router-dom";
+
 
 const Clientform = () => {
   const navigate = useNavigate();
@@ -15,64 +17,128 @@ const Clientform = () => {
   const [location, setLocation] = useState("");
   const [description, setDescription] = useState("");
 
-  // Check if the user is authenticated when the component mounts
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-      if (!user || error) {
-        toast.error("Please log in to submit a case.");
-        navigate("/login");
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  const { id } = useParams(); // Get 'id' from URL
+  const lawyerId = id.toString();
+  console.log("ID from URL:", lawyerId);
 
+  // console.log("ID from URL:", id); 
+  // Check if the user is authenticated when the component mounts
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const { data: { user }, error } = await supabase.auth.getUser();
+  //     if (!user || error) {
+  //       toast.error("Please log in to submit a case.");
+  //       navigate("/login");
+  //     }
+  //   };
+  //   checkAuth();
+  // }, [navigate]);
+  useEffect(() => {
+    const userId = localStorage.getItem("id");
+  
+    if (!userId) {
+      toast.error("Please log in to submit a case.");
+      navigate("/login");
+    }
+  }, [navigate]);
+  
+
+  // const handleSubmit = async () => {
+  //   // Validate required fields
+  //   if (!caseName || !category || !phoneNumber || !location || !description) {
+  //     toast.error("Please Fill All Fields");
+  //     return;
+  //   }
+
+  //   // Validate phone number length
+  //   if (phoneNumber.length !== 10) {
+  //     toast.error("Invalid Phone Number");
+  //     return;
+  //   }
+
+  //   // Get the authenticated user (client) for client_id
+  //   const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+  //   if (authError || !user) {
+  //     toast.error("User Not Authenticated");
+  //     console.error("Auth Error:", authError);
+  //     navigate("/login");
+  //     return;
+  //   }
+
+  //   // Insert into the caseform table
+  //   const { data, error } = await supabase
+  //     .from("caseform")
+  //     .insert([
+  //       {
+  //         client_id: user.id,
+  //         lawyer_id: id,
+  //         case_name: caseName,
+  //         category: category,
+  //         phone_number: phoneNumber,
+  //         location: location,
+  //         description: description,
+  //       },
+  //     ]);
+
+  //   if (error) {
+  //     console.error("Upload Error:", error);
+  //     toast.error("Submission Failed ❌");
+  //   } else {
+  //     toast.success("Form Submitted Successfully ✅");
+  //     navigate("/upload");
+  //   }
+  // };
   const handleSubmit = async () => {
     // Validate required fields
     if (!caseName || !category || !phoneNumber || !location || !description) {
       toast.error("Please Fill All Fields");
       return;
     }
-
+  
     // Validate phone number length
     if (phoneNumber.length !== 10) {
       toast.error("Invalid Phone Number");
       return;
     }
-
+  
     // Get the authenticated user (client) for client_id
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+    const user = localStorage.getItem("id"); // Get stored user ID
+    if (!user) {
       toast.error("User Not Authenticated");
-      console.error("Auth Error:", authError);
       navigate("/login");
       return;
     }
-
-    // Insert into the caseform table
-    const { data, error } = await supabase
-      .from("caseform")
-      .insert([
-        {
-          client_id: user.id,
-          lawyer_id: locationHook.pathname.split("/")[2],
-          case_name: caseName,
-          category: category,
-          phone_number: phoneNumber,
-          location: location,
-          description: description,
-        },
-      ]);
-
-    if (error) {
-      console.error("Upload Error:", error);
-      toast.error("Submission Failed ❌");
-    } else {
-      toast.success("Form Submitted Successfully ✅");
-      navigate("/upload");
+  
+    try {
+      // Insert into the caseform table
+      const { data, error } = await supabase
+        .from("caseform")
+        .insert([
+          {
+            client_id: user, // Use `user` directly
+            lawyer_id: lawyerId,
+            case_name: caseName,
+            category: category,
+            phone_number: phoneNumber,
+            location: location,
+            description: description,
+          },
+        ]);
+  
+      if (error) {
+        console.error("Upload Error:", error);
+        toast.error("Submission Failed ❌");
+      } else {
+        toast.success("Form Submitted Successfully ✅");
+        navigate(`/upload/${user}/${lawyerId}`);
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      toast.error("Something went wrong!");
     }
   };
+  
 
   return (
     <>
