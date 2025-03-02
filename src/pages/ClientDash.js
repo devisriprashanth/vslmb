@@ -27,7 +27,7 @@ const ClientDash = () => {
             background: 'rgba(255, 250, 250, 0.25)',
             boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
             backdropFilter: 'blur(8.5px)',
-            WebkitBackdropFilter: 'blur(8.5px)', // For Safari support
+            WebkitBackdropFilter: 'blur(8.5px)', 
           }}
         >
           <div className="overflow-x-auto">
