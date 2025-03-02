@@ -13,7 +13,7 @@ const Header = () => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
     if (storedUser) {
       setUserName(storedUser.first_name);
-      setIsLawyer(storedUser.isLawyerSelected); // ✅ Get Lawyer or Client Status
+      setIsLawyer(storedUser.isLawyerSelected); 
     }
   }, []);
 
