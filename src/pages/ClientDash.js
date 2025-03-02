@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../component/Header';
-import { useNavigate } from "react-router-dom";
-import supabase from "../supabaseClient";
+import { useNavigate } from 'react-router-dom';
+import supabase from '../supabaseClient';
 
 const ClientDash = () => {
   const [cases, setCases] = useState([]);
@@ -11,7 +11,31 @@ const ClientDash = () => {
 
   useEffect(() => {
     checkAuthAndFetchCases();
-  }, []);
+
+    // Real-time subscription for case updates
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    const clientId = storedUser?.id; // Assuming the user object contains the client ID
+
+    if (!clientId) {
+      setError('Please log in as a client to view your cases.');
+      navigate('/login');
+      return;
+    }
+
+    const channel = supabase.channel('client-cases')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'caseform', filter: `client_id=eq.${clientId}` },
+        (payload) => {
+          fetchCases(clientId); // Refresh cases on any change
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel); // Clean up subscription on unmount
+    };
+  }, [navigate]);
 
   async function checkAuthAndFetchCases() {
     const { data: { session }, error: authError } = await supabase.auth.getSession();
@@ -21,7 +45,9 @@ const ClientDash = () => {
       return;
     }
 
-    fetchCases(session.user.id);
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    const clientId = storedUser?.id; // Assuming the user object contains the client ID
+    fetchCases(clientId);
   }
 
   async function fetchCases(clientId) {

@@ -183,6 +183,7 @@ const ClientsLawyer = () => {
                   <th className="py-2 px-3">Case Name</th>
                   <th className="py-2 px-3">Category</th>
                   <th className="py-2 px-3">Status</th>
+                  <th className="py-2 px-3">Client PDF</th>
                   <th className="py-2 px-3">Actions</th>
                 </tr>
               </thead>
@@ -195,6 +196,13 @@ const ClientsLawyer = () => {
                       <td className="py-2 px-3">{caseItem.category || 'No data'}</td>
                       <td className="py-2 px-3 font-semibold text-blue-600">
                         {caseItem.status || 'Pending'}
+                      </td>
+                      <td className="py-2 px-3">
+                        {caseItem.client_pdf ? (
+                          <a href={caseItem.client_pdf} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                            View PDF
+                          </a>
+                        ) : 'No PDF'}
                       </td>
                       <td className="py-2 px-3 flex space-x-2">
                         <button
@@ -225,7 +233,7 @@ const ClientsLawyer = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="5" className="text-center py-4">
+                    <td colSpan="6" className="text-center py-4">
                       No cases found
                     </td>
                   </tr>
