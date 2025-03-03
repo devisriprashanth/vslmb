@@ -1,25 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Header from '../../component/Header';
 import { RiMenu3Fill, RiMenu2Line } from "react-icons/ri";
 import supabase from '../../supabaseClient';
 
 const LawyerDash = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [previousClients, setPreviousClients] = useState([]);
   const [showOutcomePopup, setShowOutcomePopup] = useState(null);
   const [selectedOutcome, setSelectedOutcome] = useState("");
-  const [showAlert, setShowAlert] = useState(true); // State to control alert visibility
+  const [showAlert, setShowAlert] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem("user"));
-    const lawyerId = storedUser?.id; // Assuming the user object contains the lawyer ID
+    const lawyerId = storedUser?.id;
 
-    if (!lawyerId) return;
+    if (!lawyerId && !loading) {
+      navigate('/login');
+      return;
+    }
+
+    const checkLawyerForm = async () => {
+      if (!lawyerId) {
+        console.log("No lawyerId, showing toggle");
+        setShowAlert(true);
+        return;
+      }
+
+      console.log("Checking lawyers_form for ID:", lawyerId);
+      const { data, error } = await supabase
+        .from("lawyers_form")
+        .select("id")
+        .eq("id", lawyerId);
+
+      console.log("Supabase response - Data:", data, "Error:", error);
+      if (error) {
+        console.error("Error checking lawyers_form:", error.message);
+        setShowAlert(true); // Show toggle on error (assume not filled)
+      } else if (!data || data.length === 0) {
+        console.log("No data found in lawyers_form, showing toggle");
+        setShowAlert(true); // No entry, show toggle
+      } else {
+        console.log("Data found in lawyers_form, hiding toggle");
+        setShowAlert(false); // Entry exists, hide toggle
+      }
+    };
 
     const fetchAppointments = async () => {
+      if (!lawyerId) return;
+
       const { data, error } = await supabase
         .from("case_form")
         .select("*")
@@ -32,8 +65,20 @@ const LawyerDash = () => {
       }
     };
 
-    fetchAppointments();
-  }, []);
+    const initialize = async () => {
+      try {
+        await Promise.all([checkLawyerForm(), fetchAppointments()]);
+      } catch (err) {
+        console.error("Initialization error:", err);
+        setShowAlert(true); // Show toggle on failure as fallback
+      } finally {
+        setLoading(false);
+        console.log("Loading complete, showAlert:", showAlert);
+      }
+    };
+
+    initialize();
+  }, [location, navigate]);
 
   const handleStatusChange = async (id, newStatus) => {
     if (newStatus === "Completed") {
@@ -43,11 +88,14 @@ const LawyerDash = () => {
         app.id === id ? { ...app, status: newStatus } : app
       ));
 
-      // Update status in database
-      await supabase
+      const { error } = await supabase
         .from("case_form")
         .update({ status: newStatus })
         .eq("id", id);
+
+      if (error) {
+        console.error("Failed to update status:", error);
+      }
     }
   };
 
@@ -57,16 +105,30 @@ const LawyerDash = () => {
       setAppointments(appointments.filter((app) => app.id !== id));
       setPreviousClients([...previousClients, { ...completed, outcome: selectedOutcome }]);
 
-      // Update database
-      await supabase
+      const { error } = await supabase
         .from("case_form")
         .update({ status: "Completed", outcome: selectedOutcome })
         .eq("id", id);
 
-      setShowOutcomePopup(null);
-      setSelectedOutcome("");
+      if (error) {
+        console.error("Failed to update outcome:", error);
+      } else {
+        setShowOutcomePopup(null);
+        setSelectedOutcome("");
+      }
     }
   };
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-bg1 py-2">
+        <div className='shadow-md shadow-black/30 w-full'>
+          <Header />
+        </div>
+        <div className="text-center py-10 text-xl">Loading...</div>
+      </section>
+    );
+  }
 
   return (
     <section className="min-h-screen bg-bg1 py-2">
@@ -99,6 +161,21 @@ const LawyerDash = () => {
           </div>
         </div>
 
+        {/* Notification Toggle: Show if no data in lawyers_form, Hide if data present */}
+        {showAlert && (
+          <div className="bg-yellow-500 text-white p-4 rounded-lg mb-6 text-center">
+            <p>
+              Welcome! Please fill out your profile form to get started.{' '}
+              <span
+                onClick={() => navigate('/lawyer-form')}
+                className="underline cursor-pointer"
+              >
+                Fill out the form
+              </span>
+            </p>
+          </div>
+        )}
+
         {/* Appointments Section */}
         <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect px-6 mb-6">
           <h2 className="text-lg font-semibold mb-4 text-black">Upcoming Appointments</h2>
@@ -115,12 +192,12 @@ const LawyerDash = () => {
               <tbody>
                 {appointments.map((app) => (
                   <tr key={app.id} className="border-b">
-                    <td>{app.client_name}</td>
-                    <td>{app.case_type}</td>
+                    <td>{app.client_name || "N/A"}</td>
+                    <td>{app.case_type || "N/A"}</td>
                     <td>
                       <input
                         type="date"
-                        value={app.date.split("T")[0]}
+                        value={app.date ? app.date.split("T")[0] : ""}
                         className="border p-1 rounded w-full sm:w-auto"
                         onChange={(e) =>
                           setAppointments(
@@ -133,7 +210,7 @@ const LawyerDash = () => {
                     </td>
                     <td>
                       <select
-                        value={app.status}
+                        value={app.status || "Pending"}
                         className="border p-1 rounded"
                         onChange={(e) => handleStatusChange(app.id, e.target.value)}
                       >
@@ -158,7 +235,7 @@ const LawyerDash = () => {
             <ul>
               {previousClients.map((client, index) => (
                 <li key={index} className="mb-2">
-                  {client.client_name} - {client.case_type} ({client.outcome})
+                  {client.client_name || "N/A"} - {client.case_type || "N/A"} ({client.outcome})
                 </li>
               ))}
             </ul>
@@ -200,10 +277,19 @@ const LawyerDash = () => {
               </label>
               <div className="mt-4">
                 <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
                   onClick={() => handleOutcomeSubmit(showOutcomePopup)}
                 >
                   Submit
+                </button>
+                <button
+                  className="bg-gray-500 text-white px-4 py-2 rounded"
+                  onClick={() => {
+                    setShowOutcomePopup(null);
+                    setSelectedOutcome("");
+                  }}
+                >
+                  Cancel
                 </button>
               </div>
             </div>
