@@ -36,34 +36,41 @@ const LawyerDash = () => {
   //     checkLawyerForm();
   //   }
   // }, []);
-
+  
   useEffect(() => {
     const checkLawyerForm = async () => {
       const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+      console.log("Stored User:", storedUser); // Debugging
       const userName = storedUser?.first_name || "";
   
-      if (!userName) return;
+      if (!userName) {
+        console.warn("No userName found in localStorage");
+        return;
+      }
   
       try {
         const { data, error } = await supabase
           .from("lawyers_form")
-          .select("first_name")
-          .eq("first_name", userName)
-          .maybeSingle(); // Avoids throwing an error if no match is found
+          .select("first_name") // Fetch multiple rows
+          .eq("first_name", userName);
   
         if (error) {
           console.error("Failed to fetch lawyers_form data:", error);
           return;
         }
   
-        setShowAlert(!data); // If no match, show alert
+        console.log("Fetched Data:", data);
+  
+        // Show alert only if there are no matching records
+        setShowAlert(data.length === 0);
       } catch (err) {
         console.error("Unexpected error:", err);
       }
     };
   
     checkLawyerForm();
-  }, []); // Dependencies
+  }, []); // Run only once on mount
+  
   
 
   const handleStatusChange = (id, newStatus) => {
