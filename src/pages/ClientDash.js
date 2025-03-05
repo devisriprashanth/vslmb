@@ -29,6 +29,7 @@ const ClientDash = () => {
           description,
           status,
           lawyer_id,
+          appointment_datetime,
           client_pdf
         `)
         .eq("client_id", clientId)
@@ -86,6 +87,7 @@ const ClientDash = () => {
                   <th className="py-2 px-4">Category</th>
                   <th className="py-2 px-4">Description</th>
                   <th className="py-2 px-4">Lawyer</th>
+                  <th className="py-2 px-4">Appointment Date & Time</th>
                   <th className="py-2 px-4">Status</th>
                   <th className="py-2 px-4">Client PDF</th>
                 </tr>
@@ -97,6 +99,7 @@ const ClientDash = () => {
                     <td className="py-2 px-4">{caseItem.category}</td>
                     <td className="py-2 px-4">{caseItem.description}</td>
                     <td className="py-2 px-4">{caseItem.lawyerName}</td>
+                    <td className="py-2 px-4">{caseItem.appointment_datetime || '--'}</td>
                     <td className="py-2 px-4 font-semibold text-blue-600">{caseItem.status}</td>
                     <td className="py-2 px-4">
                       {caseItem.client_pdf ? (
