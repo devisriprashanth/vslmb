@@ -101,6 +101,7 @@ const Clientform = () => {
               className="p-2 border border-gray-300 rounded-md text-lg bg-white"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
+              disabled // Disable the category select element
             >
               <option value="" hidden>
                 Category
@@ -131,6 +132,7 @@ const Clientform = () => {
                 className="py-2 rounded-md w-full text-lg bg-white"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
+                disabled // Disable the location select element
               >
                 <option value="" hidden>
                   Location
