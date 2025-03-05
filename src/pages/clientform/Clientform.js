@@ -7,32 +7,19 @@ import supabase from "../../supabaseClient";
 import toast from "react-hot-toast";
 import { useParams } from "react-router-dom";
 
-
 const Clientform = () => {
   const navigate = useNavigate();
   const locationHook = useLocation();
   const [caseName, setCaseName] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(locationHook.state?.category || ""); // Set initial category from location state
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [location, setLocation] = useState("");
+  const [location, setLocation] = useState(locationHook.state?.location || ""); // Set initial location from location state
   const [description, setDescription] = useState("");
 
   const { id } = useParams(); // Get 'id' from URL
   const lawyerId = id.toString();
   console.log("ID from URL:", lawyerId);
 
-  // console.log("ID from URL:", id); 
-  // Check if the user is authenticated when the component mounts
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     const { data: { user }, error } = await supabase.auth.getUser();
-  //     if (!user || error) {
-  //       toast.error("Please log in to submit a case.");
-  //       navigate("/login");
-  //     }
-  //   };
-  //   checkAuth();
-  // }, [navigate]);
   useEffect(() => {
     const userId = localStorage.getItem("id");
   
@@ -41,54 +28,7 @@ const Clientform = () => {
       navigate("/login");
     }
   }, [navigate]);
-  
 
-  // const handleSubmit = async () => {
-  //   // Validate required fields
-  //   if (!caseName || !category || !phoneNumber || !location || !description) {
-  //     toast.error("Please Fill All Fields");
-  //     return;
-  //   }
-
-  //   // Validate phone number length
-  //   if (phoneNumber.length !== 10) {
-  //     toast.error("Invalid Phone Number");
-  //     return;
-  //   }
-
-  //   // Get the authenticated user (client) for client_id
-  //   const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-  //   if (authError || !user) {
-  //     toast.error("User Not Authenticated");
-  //     console.error("Auth Error:", authError);
-  //     navigate("/login");
-  //     return;
-  //   }
-
-  //   // Insert into the caseform table
-  //   const { data, error } = await supabase
-  //     .from("caseform")
-  //     .insert([
-  //       {
-  //         client_id: user.id,
-  //         lawyer_id: id,
-  //         case_name: caseName,
-  //         category: category,
-  //         phone_number: phoneNumber,
-  //         location: location,
-  //         description: description,
-  //       },
-  //     ]);
-
-  //   if (error) {
-  //     console.error("Upload Error:", error);
-  //     toast.error("Submission Failed ❌");
-  //   } else {
-  //     toast.success("Form Submitted Successfully ✅");
-  //     navigate("/upload");
-  //   }
-  // };
   const handleSubmit = async () => {
     // Validate required fields
     if (!caseName || !category || !phoneNumber || !location || !description) {
@@ -138,7 +78,6 @@ const Clientform = () => {
       toast.error("Something went wrong!");
     }
   };
-  
 
   return (
     <>
@@ -169,6 +108,14 @@ const Clientform = () => {
               <option value="Criminal Lawyer">Criminal Lawyer</option>
               <option value="Family Lawyer">Family Lawyer</option>
               <option value="Corporate Lawyer">Corporate Lawyer</option>
+              <option value="Civil Litigation Lawyer">Civil Litigation Lawyer</option>
+              <option value="Intellectual Property Lawyer">Intellectual Property Lawyer</option>
+              <option value="Tax Lawyer">Tax Lawyer</option>
+              <option value="Employment Lawyer">Employment Lawyer</option>
+              <option value="Real Estate Lawyer">Real Estate Lawyer</option>
+              <option value="Immigration Lawyer">Immigration Lawyer</option>
+              <option value="Personal Injury Lawyer">Personal Injury Lawyer</option>
+              <option value="Medical Malpractice Lawyer">Medical Malpractice Lawyer</option>
             </select>
             <input
               type="tel"
@@ -188,9 +135,25 @@ const Clientform = () => {
                 <option value="" hidden>
                   Location
                 </option>
+                <option value="Anakapalli">Anakapalli</option>
+                <option value="Ananthapuramu">Ananthapuramu</option>
+                <option value="Bapatla">Bapatla</option>
+                <option value="Chittoor">Chittoor</option>
+                <option value="East Godavari">East Godavari</option>
+                <option value="Eluru">Eluru</option>
                 <option value="Guntur">Guntur</option>
+                <option value="Kadapa">Kadapa</option>
+                <option value="Krishna">Krishna</option>
+                <option value="Kurnool">Kurnool</option>
+                <option value="Nandyal">Nandyal</option>
+                <option value="NTR">NTR</option>
+                <option value="Palnadu">Palnadu</option>
+                <option value="Prakasam">Prakasam</option>
+                <option value="Srikakulam">Srikakulam</option>
                 <option value="Tirupati">Tirupati</option>
-                <option value="Vizag">Vizag</option>
+                <option value="Visakhapatnam">Visakhapatnam</option>
+                <option value="Vizianagaram">Vizianagaram</option>
+                <option value="YSR Kadapa">YSR Kadapa</option>
               </select>
             </div>
             <textarea

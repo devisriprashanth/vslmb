@@ -42,6 +42,7 @@ const LawyerDash = () => {
 
         if (data.length > 0) {
           setAccountStatus(data[0].status);
+          setShowAlert(false); // Hide alert if first_name is found
         } else {
           setShowAlert(true);
         }
