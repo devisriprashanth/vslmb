@@ -309,8 +309,14 @@ const LawyerDash = () => {
             </div>
           </>
         ) : accountStatus === "Declined" ? (
-          <div className="bg-red-200 text-red-900 p-4 rounded-lg shadow-md mb-6">
+          <div className="bg-red-200 text-red-900 p-4 rounded-lg shadow-md mb-6 flex justify-between items-center">
             <p className="font-semibold">Your account is not accepted by the SLMB Admin.</p>
+            <button
+              className="bg-red-600 text-white px-4 py-2 rounded"
+              onClick={() => navigate('/lawyer-form')}
+            >
+              Refill Form
+            </button>
           </div>
         ) : (
           <div className="bg-yellow-200 text-yellow-900 p-4 rounded-lg shadow-md mb-6">

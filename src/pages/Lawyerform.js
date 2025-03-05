@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../supabaseClient';
 import Header from '../component/Header';
@@ -19,6 +19,7 @@ const LawyerForm = () => {
   const [casesWon, setCasesWon] = useState('');
   const [category, setCategory] = useState('');
   const [error, setError] = useState('');
+  const [isNewUser, setIsNewUser] = useState(true); // State to track if it's a new user
 
   // Enrollment Number Validation
   const enrollmentPattern = /^AP\/\d{1,3}(-[A-Z])?\/\d{4}$/;
@@ -33,6 +34,23 @@ const LawyerForm = () => {
     }
   };
 
+  useEffect(() => {
+    // Check if the user is an existing user with 'Declined' status
+    const checkUserStatus = async () => {
+      const { data, error } = await supabase
+        .from('lawyers_form')
+        .select('status')
+        .eq('first_name', firstName)
+        .single();
+
+      if (data && data.status === 'Declined') {
+        setIsNewUser(false);
+      }
+    };
+
+    checkUserStatus();
+  }, [firstName]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -41,26 +59,52 @@ const LawyerForm = () => {
       return;
     }
 
-    const { data, error } = await supabase.from("lawyers_form").insert([
-      {
-        uid: lawyerId,
-        first_name: firstName,
-        enrollment_number: enrollmentNumber,
-        location: district,
-        price: parseFloat(price),
-        experience: parseInt(experience),
-        category: category,
-        cases_taken: parseInt(casesTaken),
-        cases_won: parseInt(casesWon),
-      }
-    ]);
+    if (isNewUser) {
+      // Insert a new row for new users
+      const { data, error } = await supabase.from("lawyers_form").insert([
+        {
+          uid: lawyerId,
+          first_name: firstName,
+          enrollment_number: enrollmentNumber,
+          location: district,
+          price: parseFloat(price),
+          experience: parseInt(experience),
+          category: category,
+          cases_taken: parseInt(casesTaken),
+          cases_won: parseInt(casesWon),
+        }
+      ]);
 
-    if (error) {
-      console.error("❌ Error:", error);
-      alert("❌ Something went wrong");
+      if (error) {
+        console.error("❌ Error:", error);
+        alert("❌ Something went wrong");
+      } else {
+        alert("✅ Form Submitted Successfully");
+        navigate("/lawyer-dashboard");
+      }
     } else {
-      alert("✅ Form Submitted Successfully");
-      navigate("/lawyer-dashboard");
+      // Update the existing row for users with 'Declined' status
+      const { data, error } = await supabase
+        .from("lawyers_form")
+        .update({
+          enrollment_number: enrollmentNumber,
+          location: district,
+          price: parseFloat(price),
+          experience: parseInt(experience),
+          category: category,
+          cases_taken: parseInt(casesTaken),
+          cases_won: parseInt(casesWon),
+          status: 'Pending' // Reset status to default
+        })
+        .eq('first_name', firstName);
+
+      if (error) {
+        console.error("❌ Error:", error);
+        alert("❌ Something went wrong");
+      } else {
+        alert("✅ Form Updated Successfully");
+        navigate("/lawyer-dashboard");
+      }
     }
   };
 
@@ -82,7 +126,9 @@ const LawyerForm = () => {
     <section className="bg-bg1 min-h-screen flex flex-col items-center px-5">
       <Header />
       <div className="bg-white/60 shadow-lg rounded-xl p-5 w-full max-w-lg mt-10">
-        <h1 className="text-3xl text-secondary text-center">Lawyer Registration 🧑‍⚖️</h1>
+        <h1 className="text-3xl text-secondary text-center">
+          {isNewUser ? 'Lawyer Registration 🧑‍⚖️' : 'Update Lawyer Information 🧑‍⚖️'}
+        </h1>
 
         <form onSubmit={handleSubmit} className="mt-5">
           {/* Enrollment Number */}

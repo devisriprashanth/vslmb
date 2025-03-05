@@ -98,7 +98,7 @@ const Clientform = () => {
               onChange={(e) => setCaseName(e.target.value)}
             />
             <select
-              className="p-2 border border-gray-300 rounded-md text-lg bg-white"
+              className={`p-2 border border-gray-300 rounded-md text-lg bg-white ${category ? '' : 'text-gray-300'}`}
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               disabled // Disable the category select element
@@ -129,7 +129,7 @@ const Clientform = () => {
             <div className="flex items-center border border-gray-300 rounded-md bg-white">
               <CiLocationOn className="text-gray-500 mx-2 text-lg" />
               <select
-                className="py-2 rounded-md w-full text-lg bg-white"
+                className={`py-2 rounded-md w-full text-lg bg-white ${location ? '' : 'text-gray-300'}`}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
                 disabled // Disable the location select element
