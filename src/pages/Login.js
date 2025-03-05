@@ -10,39 +10,44 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  // ✅ Login Handler Function
+  // ✅ Login Handler Function with Admin Check
   const handleLogin = async (e) => {
     e.preventDefault();
-  
+
     const table = isLawyerSelected ? "lawyers" : "clients";
-  
+
     const { data, error } = await supabase
       .from(table)
       .select("*")
       .eq("email", email)
       .single(); // First, check email only
-  
+
     if (error || !data) {
       alert("Invalid Email ❌");
       return;
     }
-  
+
     // Now check password manually
     if (data.password !== password) {
       alert("Invalid Password ❌");
       return;
     }
-  
+
     // Store user data in localStorage
     localStorage.setItem("user", JSON.stringify({ first_name: data.first_name, isLawyerSelected }));
     localStorage.setItem("id", data.id);
     localStorage.setItem("first_name", data.first_name);
-  
+
     alert("Login Successful ✅");
-  
-    navigate(isLawyerSelected ? "/lawyer-dashboard" : "/client-dashboard");
+
+    // Check if the user is an Admin by comparing first_name
+    if (data.first_name === "Admin") {
+      navigate("/admin");
+    } else {
+      // Navigate to the appropriate dashboard based on user type
+      navigate(isLawyerSelected ? "/lawyer-dashboard" : "/client-dashboard");
+    }
   };
-  
 
   return (
     <section

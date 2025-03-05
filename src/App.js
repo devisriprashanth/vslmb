@@ -13,6 +13,7 @@ import ClientsLawyer from "./pages/LawyerDash/ClientsLawyer";
 import Popupsection from "./pages/Popupsection";
 import Upload from "./pages/clientform/Upload";
 import Review from "./pages/clientform/Review";
+import Admin from "./pages/Admin";
 
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/upload/:user/:lawyerId" element={<Upload setUploadedFiles={setUploadedFiles}/>}></Route>
         <Route path="/review/:user/:lawyerId"  element={<Review uploadedFiles={uploadedFiles} setUploadedFiles={setUploadedFiles}/>}></Route>
         <Route path="/filter" element={<Filter/>}></Route>
+        <Route path="/admin" element={<Admin/>}></Route>
         <Route path="/client-dashboard" element={<ClientDash/>}></Route>
         <Route path="/lawyer-dashboard" element={<LawyerDash/>}></Route>
         <Route path="/lawyer-dashboard/clients" element={<ClientsLawyer/>}></Route>
