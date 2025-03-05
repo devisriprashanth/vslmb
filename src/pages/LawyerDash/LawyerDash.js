@@ -14,6 +14,7 @@ const LawyerDash = () => {
   const [selectedOutcome, setSelectedOutcome] = useState("");
   const [showAlert, setShowAlert] = useState(true); // State to control alert visibility
   const [editedAppointments, setEditedAppointments] = useState({}); // Track edited appointments
+  const [accountStatus, setAccountStatus] = useState(""); // Track account status
 
   useEffect(() => {
     const checkLawyerForm = async () => {
@@ -29,7 +30,7 @@ const LawyerDash = () => {
       try {
         const { data, error } = await supabase
           .from("lawyers_form")
-          .select("first_name") // Fetch multiple rows
+          .select("first_name, status") // Fetch multiple rows
           .eq("first_name", userName);
 
         if (error) {
@@ -39,8 +40,11 @@ const LawyerDash = () => {
 
         console.log("Fetched Data:", data);
 
-        // Show alert only if there are no matching records
-        setShowAlert(data.length === 0);
+        if (data.length > 0) {
+          setAccountStatus(data[0].status);
+        } else {
+          setShowAlert(true);
+        }
       } catch (err) {
         console.error("Unexpected error:", err);
       }
@@ -118,8 +122,10 @@ const LawyerDash = () => {
       }
     };
 
-    fetchAppointments();
-  }, []);
+    if (accountStatus === "Accepted") {
+      fetchAppointments();
+    }
+  }, [accountStatus]);
 
   const handleStatusChange = (id, newStatus) => {
     setEditedAppointments({
@@ -193,10 +199,18 @@ const LawyerDash = () => {
                 <button onClick={() => navigate('/lawyer-dashboard')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
                   Dashboard
                 </button>
-                <button onClick={() => navigate('/lawyer-dashboard/clients')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                <button
+                  onClick={() => navigate('/lawyer-dashboard/clients')}
+                  className={`block w-full px-6 py-3 ${accountStatus !== "Accepted" ? "text-gray-400 bg-gray-200" : "text-black hover:bg-gray-200"}`}
+                  disabled={accountStatus !== "Accepted"}
+                >
                   Clients
                 </button>
-                <button onClick={() => navigate('/settings')} className="block w-full px-6 py-3 text-black hover:bg-gray-200">
+                <button
+                  onClick={() => navigate('/settings')}
+                  className={`block w-full px-6 py-3 ${accountStatus !== "Accepted" ? "text-gray-400 bg-gray-200" : "text-black hover:bg-gray-200"}`}
+                  disabled={accountStatus !== "Accepted"}
+                >
                   Settings
                 </button>
               </div>
@@ -217,79 +231,91 @@ const LawyerDash = () => {
           </div>
         )}
 
-        {/* Appointments Section */}
-        <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect px-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4 text-black">Upcoming Appointments</h2>
-          {appointments.length > 0 ? (
-            <>
-              <table className="w-full text-left">
-                <thead>
-                  <tr>
-                    <th>Client Name</th>
-                    <th>Case Type</th>
-                    <th>Case Name</th>
-                    <th>Appointment Date & Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {appointments.map((app) => (
-                    <tr key={app.id} className="border-b">
-                      <td>{app.clientName}</td>
-                      <td>{app.caseType}</td>
-                      <td>{app.caseName}</td>
-                      <td>
-                        <input
-                          type="datetime-local"
-                          value={app.appointment_datetime ? app.appointment_datetime.split(".")[0] : ""}
-                          className="border p-1 rounded w-full sm:w-auto"
-                          onChange={(e) => handleDatetimeChange(app.id, e.target.value)}
-                        />
-                      </td>
-                      <td>
-                        <select
-                          value={app.status}
-                          className="border p-1 rounded"
-                          onChange={(e) => handleStatusChange(app.id, e.target.value)}
-                        >
-                          <option>Pending</option>
-                          <option>Ongoing</option>
-                          <option>Completed</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {Object.keys(editedAppointments).length > 0 && (
-                <button
-                  onClick={handleUpdate}
-                  className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
-                >
-                  Update
-                </button>
+        {accountStatus === "Accepted" ? (
+          <>
+            {/* Appointments Section */}
+            <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect px-6 mb-6">
+              <h2 className="text-lg font-semibold mb-4 text-black">Upcoming Appointments</h2>
+              {appointments.length > 0 ? (
+                <>
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr>
+                        <th>Client Name</th>
+                        <th>Case Type</th>
+                        <th>Case Name</th>
+                        <th>Appointment Date & Time</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {appointments.map((app) => (
+                        <tr key={app.id} className="border-b">
+                          <td>{app.clientName}</td>
+                          <td>{app.caseType}</td>
+                          <td>{app.caseName}</td>
+                          <td>
+                            <input
+                              type="datetime-local"
+                              value={app.appointment_datetime ? app.appointment_datetime.split(".")[0] : ""}
+                              className="border p-1 rounded w-full sm:w-auto"
+                              onChange={(e) => handleDatetimeChange(app.id, e.target.value)}
+                            />
+                          </td>
+                          <td>
+                            <select
+                              value={app.status}
+                              className="border p-1 rounded"
+                              onChange={(e) => handleStatusChange(app.id, e.target.value)}
+                            >
+                              <option>Pending</option>
+                              <option>Ongoing</option>
+                              <option>Completed</option>
+                            </select>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {Object.keys(editedAppointments).length > 0 && (
+                    <button
+                      onClick={handleUpdate}
+                      className="mt-4 bg-blue-600 text-white px-4 py-2 rounded"
+                    >
+                      Update
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p>No Upcoming Appointments</p>
               )}
-            </>
-          ) : (
-            <p>No Upcoming Appointments</p>
-          )}
-        </div>
+            </div>
 
-        {/* Previous Clients Section */}
-        <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect">
-          <h2 className="text-lg font-semibold mb-4 text-black">Previous Clients</h2>
-          {previousClients.length > 0 ? (
-            <ul>
-              {previousClients.map((app, index) => (
-                <li key={index} className="mb-2">
-                  {app.clientName} - {app.caseType} - {app.caseName} - {app.status} - {app.appointment_datetime}
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>No Previous Clients</p>
-          )}
-        </div>
+            {/* Previous Clients Section */}
+            <div className="bg-white/70 p-6 rounded-lg shadow-lg glass-effect">
+              <h2 className="text-lg font-semibold mb-4 text-black">Previous Clients</h2>
+              {previousClients.length > 0 ? (
+                <ul>
+                  {previousClients.map((app, index) => (
+                    <li key={index} className="mb-2">
+                      {app.clientName} - {app.caseType} - {app.caseName} - {app.status} - {app.appointment_datetime}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No Previous Clients</p>
+              )}
+            </div>
+          </>
+        ) : accountStatus === "Declined" ? (
+          <div className="bg-red-200 text-red-900 p-4 rounded-lg shadow-md mb-6">
+            <p className="font-semibold">Your account is not accepted by the SLMB Admin.</p>
+          </div>
+        ) : (
+          <div className="bg-yellow-200 text-yellow-900 p-4 rounded-lg shadow-md mb-6">
+            <p className="font-semibold">Your account is in pending state.</p>
+          </div>
+        )}
 
         {/* Outcome Popup */}
         {showOutcomePopup && (

@@ -22,20 +22,6 @@ const Filter = () => {
   const [selectedFeed, setSelectedFeed] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  // Fetch Data from Backend
-  // useEffect(() => {
-  //   const fetchLawyers = async () => {
-  //     const { data, error } = await supabase.from("lawyers_form").select("*");
-
-  //     if (error) {
-  //       console.error("Failed to fetch lawyers data:", error);
-  //     } else {
-  //       setFeedData(data);
-  //     }
-  //   };
-
-  //   fetchLawyers();
-  // }, []);
   useEffect(() => {
     const fetchLawyers = async () => {
       try {
@@ -74,36 +60,38 @@ const Filter = () => {
   };
 
   // Filter the feedData based on the selected filters
-  const filteredFeedData = feedData.filter((feed) => {
-    // Rating Filter
-    const ratingMatch =
-      filters.rating.length === 0 ||
-      filters.rating.includes(Math.floor(feed.rating).toString());
+  const filteredFeedData = feedData
+    .filter((feed) => feed.status === "Accepted") // Only show lawyers with status 'Accepted'
+    .filter((feed) => {
+      // Rating Filter
+      const ratingMatch =
+        filters.rating.length === 0 ||
+        filters.rating.includes(Math.floor(feed.rating).toString());
 
-    // Success Rate Filter
-    const successRateMatch =
-      filters.successRate === 0 ||
-      feed.success_rate <= filters.successRate;
+      // Success Rate Filter
+      const successRateMatch =
+        filters.successRate === 0 ||
+        feed.success_rate <= filters.successRate;
 
-    // Experience Filter
-    const experienceMatch =
-      parseExperienceYears(feed.experience) >= filters.experience;
+      // Experience Filter
+      const experienceMatch =
+        parseExperienceYears(feed.experience) >= filters.experience;
 
-    // Categories Filter (includes both locations and lawyer categories)
-    const locationMatch =
-      filters.categories.length === 0 ||
-      filters.categories.includes(feed.location);
+      // Categories Filter (includes both locations and lawyer categories)
+      const locationMatch =
+        filters.categories.length === 0 ||
+        filters.categories.includes(feed.location);
 
-    const categoryMatch =
-      filters.categories.length === 0 ||
-      filters.categories.includes(feed.category);
+      const categoryMatch =
+        filters.categories.length === 0 ||
+        filters.categories.includes(feed.category);
 
-    // Combine location and category match (at least one should match if filters are applied)
-    const combinedCategoryMatch =
-      filters.categories.length === 0 || locationMatch || categoryMatch;
+      // Combine location and category match (at least one should match if filters are applied)
+      const combinedCategoryMatch =
+        filters.categories.length === 0 || locationMatch || categoryMatch;
 
-    return ratingMatch && successRateMatch && experienceMatch && combinedCategoryMatch;
-  });
+      return ratingMatch && successRateMatch && experienceMatch && combinedCategoryMatch;
+    });
 
   const handleFeedClick = (feed) => {
     setSelectedFeed(feed);
